@@ -1,0 +1,314 @@
+/* =========================
+   RESET
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background: #f6f7fb;
+  color: #111827;
+}
+
+/* =========================
+   LAYOUT
+========================= */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* =========================
+   SIDEBAR (MODERN)
+========================= */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(180deg, #4f5966, #111827);
+  color: white;
+  padding: 22px;
+  position: fixed;
+  height: 100vh;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 35px;
+}
+
+.logo-icon {
+  font-size: 34px;
+  color: #22c55e;
+}
+
+.logo h2 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.logo p {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.menu {
+  list-style: none;
+  margin-top: 20px;
+}
+
+.menu li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #cbd5e1;
+  transition: all 0.25s ease;
+}
+
+.menu li:hover {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  transform: translateX(4px);
+}
+
+.menu .active {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  font-weight: 600;
+}
+
+/* =========================
+   MAIN CONTENT
+========================= */
+.main-content {
+  flex: 1;
+  margin-left: 260px;
+  padding: 28px;
+}
+
+/* =========================
+   ADD BUTTON (MODERN)
+========================= */
+.add-btn {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(34, 197, 94, 0.25);
+  transition: all 0.2s ease;
+}
+
+.add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 25px rgba(34, 197, 94, 0.35);
+}
+
+/* =========================
+   TABLE CARD
+========================= */
+.table-container {
+  margin-top: 18px;
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+thead {
+  background: #f9fafb;
+}
+
+th {
+  text-align: left;
+  padding: 14px;
+  font-size: 13px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+td {
+  padding: 14px;
+  border-top: 1px solid #f3f4f6;
+  font-size: 14px;
+  color: #374151;
+}
+
+tbody tr {
+  transition: 0.2s;
+}
+
+tbody tr:hover {
+  background: #f9fafb;
+  transform: scale(1.01);
+}
+
+/* =========================
+   ACTION ICONS
+========================= */
+td svg {
+  margin-right: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.2s;
+}
+
+td svg:hover {
+  transform: scale(1.2);
+}
+
+td svg:first-child {
+  color: #3b82f6;
+}
+
+td svg:last-child {
+  color: #ef4444;
+}
+
+/* =========================
+   MODAL OVERLAY
+========================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(6px);
+}
+
+/* MODAL BOX */
+.modal {
+  width: 520px;
+  background: white;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+  animation: pop 0.25s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* HEADER */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modal-header svg {
+  cursor: pointer;
+  color: #6b7280;
+  transition: 0.2s;
+}
+
+.modal-header svg:hover {
+  color: #ef4444;
+  transform: rotate(90deg);
+}
+
+/* INPUTS */
+.modal input,
+.modal textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  margin-bottom: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.modal input:focus,
+.modal textarea:focus {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+}
+
+/* SUBMIT BUTTON */
+.modal button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.modal button[type="submit"]:hover {
+  transform: translateY(-2px);
+}
+
+/* IMAGE PREVIEW */
+.modal img {
+  margin-top: 10px;
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #eee;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 80px;
+  }
+
+  .main-content {
+    margin-left: 80px;
+    padding: 16px;
+  }
+
+  .logo h2,
+  .logo p,
+  .menu li span {
+    display: none;
+  }
+
+  .menu li {
+    justify-content: center;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  .modal {
+    width: 92%;
+  }
+}

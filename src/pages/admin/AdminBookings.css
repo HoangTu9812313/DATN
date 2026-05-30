@@ -1,0 +1,552 @@
+/* =========================
+   CARDS (MODERN UI)
+========================= */
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.card {
+  background: linear-gradient(145deg, #ffffff, #f9fafb);
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s ease;
+  border: 1px solid #f3f4f6;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+  font-size: 13px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card p {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 10px;
+  color: #111827;
+}
+
+/* =========================
+   TABLE (MODERN)
+========================= */
+
+.table-container {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+thead {
+  background: #f9fafb;
+}
+
+th {
+  text-align: left;
+  padding: 14px;
+  font-size: 12px;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+td {
+  padding: 14px;
+  border-top: 1px solid #f3f4f6;
+  font-size: 14px;
+  color: #374151;
+  vertical-align: middle;
+}
+
+tbody tr {
+  transition: 0.2s;
+}
+
+tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* =========================
+   STATUS SELECT
+========================= */
+
+.status-select {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+}
+
+.status-select.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.status-select.paid {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-select.cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* =========================
+   PRICE
+========================= */
+
+.price-cell {
+  font-weight: 700;
+  color: #16a34a;
+}
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.view-btn {
+  color: #2563eb;
+  cursor: pointer;
+  font-size: 17px;
+  transition: all 0.2s ease;
+}
+
+.view-btn:hover {
+  color: #1d4ed8;
+  transform: scale(1.15);
+}
+
+.delete-btn {
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #dc2626;
+  transform: scale(1.15);
+}
+
+/* =========================
+   DETAIL MODAL
+========================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(15, 23, 42, 0.55);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;
+
+  z-index: 999;
+
+  backdrop-filter: blur(4px);
+
+  animation: fadeIn 0.25s ease;
+}
+
+/* MODAL BOX */
+
+.booking-modal {
+  width: 100%;
+  max-width: 480px;
+
+  background: #ffffff;
+
+  border-radius: 18px;
+
+  padding: 20px;
+
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.16),
+    0 6px 16px rgba(0, 0, 0, 0.08);
+
+  animation: modalZoom 0.25s ease;
+}
+
+/* =========================
+   MODAL HEADER
+========================= */
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.modal-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.close-icon {
+  width: 36px;
+  height: 36px;
+
+  border-radius: 50%;
+
+  background: #f3f4f6;
+  color: #6b7280;
+
+  padding: 8px;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.close-icon:hover {
+  background: #ef4444;
+  color: white;
+  transform: rotate(90deg);
+}
+
+/* =========================
+   DETAIL BODY
+========================= */
+
+.booking-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ITEM */
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 12px 14px;
+
+  border-radius: 14px;
+
+  background: #f9fafb;
+
+  transition: all 0.25s ease;
+}
+
+.detail-item:hover {
+  background: #f3f4f6;
+}
+
+.detail-item span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.detail-item strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  text-align: right;
+}
+
+/* =========================
+   PRICE
+========================= */
+
+.price-detail {
+  color: #16a34a !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+.status-text {
+  padding: 6px 12px;
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  text-transform: capitalize;
+}
+
+.status-text.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.status-text.paid {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-text.cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* =========================
+   LOADING & ACCESS
+========================= */
+
+.loading,
+.no-access {
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 24px;
+  font-weight: 700;
+
+  color: #111827;
+}
+
+.no-access h1 {
+  font-size: 90px;
+  color: #ef4444;
+}
+
+.no-access h2 {
+  margin-top: 10px;
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalZoom {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1200px) {
+
+  .dashboard-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+
+  table {
+    min-width: 700px;
+  }
+
+  .booking-modal {
+    max-width: 95%;
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+  }
+
+  .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detail-item strong {
+    text-align: left;
+  }
+
+  .price-detail {
+    font-size: 18px !important;
+  }
+}
+/* ================= BANK INFO ================= */
+
+.bank-info-box {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bank-info-box p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bank-info-box strong {
+  color: #111827;
+  min-width: 120px;
+}
+
+/* Highlight khi có refund */
+.detail-item .bank-info-box {
+  border-left: 4px solid #f59e0b;
+}
+
+/* Status refund_pending highlight */
+.status-text.refund_pending {
+  color: #d97706;
+  background: #fff7ed;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* Status refunded */
+.status-text.refunded {
+  color: #16a34a;
+  background: #ecfdf5;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+/* ================= STATUS BADGE ================= */
+
+.status-text {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  display: inline-block;
+}
+
+/* pending */
+.status-text.pending {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+/* paid */
+.status-text.paid {
+  background: #ecfdf5;
+  color: #16a34a;
+}
+
+/* cancelled */
+.status-text.cancelled {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* refund pending */
+.status-text.refund_pending {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+/* refunded */
+.status-text.refunded {
+  background: #ecfeff;
+  color: #0891b2;
+}
+/* ================= BANK MODAL ================= */
+
+.bank-modal {
+  width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.bank-btn {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: none;
+  background: #6366f1;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.bank-btn:hover {
+  background: #4f46e5;
+}
+/* Chờ hoàn tiền */
+.status-select.refund_pending,
+.status-text.refund_pending {
+  background: #fff7ed;
+  color: #d97706;
+}
+
+/* Đã hoàn tiền */
+.status-select.refunded,
+.status-text.refunded {
+  background: #ecfeff;
+  color: #0891b2;
+}

@@ -1,0 +1,666 @@
+/* ================= GOOGLE FONT ================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ================= RESET ================= */
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+  font-family: 'Inter', sans-serif;
+}
+
+html{
+  scroll-behavior: smooth;
+}
+
+body{
+  background: #f4f6f8;
+  overflow-x: hidden;
+  color: #111827;
+}
+
+/* ================= PAGE ================= */
+
+.all-fields{
+  background: #f4f6f8;
+  min-height: 100vh;
+}
+
+/* ================= HEADER ================= */
+
+.hero-header{
+  background: linear-gradient(
+    135deg,
+    #16a34a,
+    #22c55e
+  );
+
+  padding: 80px 20px;
+
+  text-align: center;
+
+  color: white;
+}
+
+.hero-header h1{
+  font-size: 48px;
+  font-weight: 800;
+
+  margin-bottom: 14px;
+
+  letter-spacing: -1px;
+}
+
+.hero-header p{
+  font-size: 16px;
+
+  opacity: 0.95;
+
+  color: #f3f4f6;
+}
+
+/* ================= SEARCH BOX (FIXED - COMPACT) ================= */
+
+.search-box {
+  margin: 30px auto 0;
+  max-width: 620px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  background: rgba(255, 255, 255, 0.98);
+
+  padding: 10px 12px;
+
+  border-radius: 14px;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+
+  transition: 0.3s;
+
+  backdrop-filter: blur(8px);
+}
+
+/* ICON */
+.search-box svg {
+  color: #22c55e;
+  font-size: 16px;
+}
+
+/* INPUT */
+.search-box input {
+  flex: 1;
+
+  border: none;
+  outline: none;
+
+  font-size: 14px;
+
+  background: transparent;
+
+  color: #111827;
+
+  padding: 6px 4px;
+}
+
+/* PLACEHOLDER */
+.search-box input::placeholder {
+  color: #9ca3af;
+}
+
+/* BUTTON */
+.search-box button {
+  height: 38px;
+
+  border: none;
+
+  padding: 0 16px;
+
+  border-radius: 10px;
+
+  background: linear-gradient(
+    135deg,
+    #22c55e,
+    #16a34a
+  );
+
+  color: white;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+
+  white-space: nowrap;
+}
+
+.search-box button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(34, 197, 94, 0.25);
+}
+/* ================= CONTAINER ================= */
+
+.content-container{
+  max-width: 1180px;
+
+  margin: auto;
+
+  padding: 40px 20px 70px;
+}
+
+/* ================= FILTER ================= */
+
+.filter-bar{
+  width: 100%;
+
+  margin-bottom: 35px;
+
+  background: white;
+
+  padding: 18px 22px;
+
+  border-radius: 18px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 15px;
+
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+.filter-bar select{
+  height: 45px;
+
+  border: 1px solid #e5e7eb;
+  outline: none;
+
+  padding: 0 14px;
+
+  border-radius: 12px;
+
+  background: #fff;
+
+  color: #111827;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.filter-bar span{
+  font-size: 15px;
+  color: #6b7280;
+}
+
+/* ================= GRID ================= */
+
+.field-list{
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 28px;
+}
+
+/* ================= CARD ================= */
+
+.field-card{
+  background: white;
+
+  border-radius: 24px;
+
+  overflow: hidden;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+
+  transition: 0.35s;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.field-card:hover{
+  transform: translateY(-8px);
+
+  box-shadow: 0 18px 40px rgba(0,0,0,0.14);
+}
+
+/* ================= IMAGE ================= */
+
+.field-image{
+  position: relative;
+}
+
+.field-image img{
+  width: 100%;
+  height: 230px;
+
+  object-fit: cover;
+}
+
+/* ================= TYPE ================= */
+
+.field-type{
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+
+  background: #dcfce7;
+  color: #15803d;
+
+  padding: 8px 16px;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ================= RATING ================= */
+
+.rating{
+  position: absolute;
+  top: 15px;
+  right: 15px;
+
+  background: white;
+
+  padding: 6px 10px;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.rating svg{
+  color: #facc15;
+}
+
+/* ================= BODY ================= */
+
+.field-info{
+  padding: 22px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+
+  flex: 1;
+}
+
+.field-info h3{
+  font-size: 22px;
+  font-weight: 800;
+
+  line-height: 1.4;
+
+  color: #111827;
+}
+
+/* ================= LOCATION ================= */
+
+.field-location{
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  color: #6b7280;
+
+  font-size: 14px;
+}
+
+.field-location svg{
+  color: #22c55e;
+}
+
+/* ================= DESC ================= */
+
+.desc{
+  font-size: 14px;
+
+  color: #6b7280;
+
+  line-height: 1.7;
+
+  display: -webkit-box;
+
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+}
+
+/* ================= PRICE ================= */
+
+.price{
+  font-size: 28px;
+  font-weight: 800;
+
+  color: #16a34a;
+}
+
+/* ================= FOOTER ================= */
+
+.footer{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: 5px;
+
+  color: #6b7280;
+
+  font-size: 14px;
+}
+
+/* ================= BUTTON ================= */
+
+.field-info a{
+  margin-top: auto;
+}
+
+.field-info button{
+  width: 100%;
+  height: 52px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: linear-gradient(
+    135deg,
+    #22c55e,
+    #16a34a
+  );
+
+  color: white;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.field-info button:hover{
+  transform: translateY(-2px);
+
+  box-shadow: 0 10px 22px rgba(34,197,94,0.28);
+}
+
+/* ================= LOADING ================= */
+
+.loading{
+  text-align: center;
+
+  margin-top: 60px;
+
+  color: #16a34a;
+
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1100px){
+
+  .field-list{
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+@media(max-width:768px){
+
+  .hero-header{
+    padding: 70px 20px;
+  }
+
+  .hero-header h1{
+    font-size: 38px;
+  }
+
+  .hero-header p{
+    font-size: 15px;
+  }
+
+  .search-box{
+    flex-direction: column;
+
+    height: auto;
+
+    padding: 18px;
+  }
+
+  .search-box button{
+    width: 100%;
+  }
+
+  .filter-bar{
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .field-list{
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media(max-width:576px){
+
+  .hero-header h1{
+    font-size: 30px;
+  }
+
+  .field-image img{
+    height: 210px;
+  }
+
+  .field-info h3{
+    font-size: 20px;
+  }
+
+  .price{
+    font-size: 24px;
+  }
+
+}
+/* ================= REALTIME STATUS ================= */
+
+.field-image {
+  position: relative;
+}
+
+.live-status {
+  position: absolute;
+
+  bottom: 10px;
+  left: 10px;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 7px 14px;
+
+  border-radius: 30px;
+
+  color: white;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  backdrop-filter: blur(10px);
+}
+
+.live-status svg {
+  font-size: 9px;
+}
+
+/* AVAILABLE */
+
+.status-available {
+  background: rgba(
+    34,
+    197,
+    94,
+    0.95
+  );
+}
+
+/* HOLDING */
+
+.status-holding {
+  background: rgba(
+    245,
+    158,
+    11,
+    0.95
+  );
+}
+
+/* BOOKED */
+
+.status-booked {
+  background: rgba(
+    220,
+    38,
+    38,
+    0.95
+  );
+}
+/* ================= SLOT STATUS ================= */
+
+.time-slot{
+  background: white;
+
+  border: 2px solid #e5e7eb;
+
+  border-radius: 14px;
+
+  padding: 14px;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-weight: 600;
+}
+
+.time-slot:hover{
+  transform: translateY(-2px);
+}
+
+/* SLOT ĐANG CHỌN */
+
+.time-slot.selected{
+  background: #16a34a;
+  color: white;
+
+  border-color: #16a34a;
+}
+
+/* SLOT ĐANG GIỮ */
+
+.time-slot.holding-slot{
+  background: #f59e0b;
+  color: white;
+
+  border-color: #f59e0b;
+
+  cursor: not-allowed;
+
+  opacity: 0.9;
+}
+
+/* SLOT ĐÃ ĐẶT */
+
+.time-slot.booked-slot{
+  background: #dc2626;
+  color: white;
+
+  border-color: #dc2626;
+
+  cursor: not-allowed;
+
+  opacity: 0.95;
+}
+/* ================= BOOKED ================= */
+
+.booked-slot {
+  background: #ff4d4f !important;
+  color: white !important;
+  border: 2px solid #ff1f1f !important;
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+/* ================= HOLDING ================= */
+
+.holding-slot {
+  background: #ffd666 !important;
+  color: #333 !important;
+  border: 2px solid #faad14 !important;
+}
+
+/* ================= SELECTED ================= */
+
+.selected {
+  background: #52c41a !important;
+  color: white !important;
+  border: 2px solid #389e0d !important;
+}
+.rating-select {
+  width: 100%;
+
+  padding: 14px 16px;
+
+  border-radius: 14px;
+
+  border: 2px solid #e5e7eb;
+
+  margin-bottom: 16px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  background: white;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.rating-select:focus {
+  outline: none;
+
+  border-color: #22c55e;
+
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+}

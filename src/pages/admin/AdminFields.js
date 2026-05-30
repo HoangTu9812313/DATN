@@ -1,0 +1,401 @@
+import React, { useEffect, useState } from "react";
+
+import "./AdminFields.css";
+import {
+  FaFutbol,
+  FaChartBar,
+  FaClipboardList,
+  FaUsers,
+  FaEdit,
+  FaTrash,
+  FaTimes,
+  FaComments,
+  FaTicketAlt,
+  FaBell
+} from "react-icons/fa";
+
+import { Link } from "react-router-dom";
+import API from "../../services/api";
+
+function AdminFields() {
+  // ================= STATE =================
+  const [fields, setFields] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [editingField, setEditingField] = useState(null);
+  const [previewImage, setPreviewImage] = useState("");
+
+  const [formData, setFormData] = useState({
+    name: "",
+    address: "",
+    type: "Sân 5",
+    description: "",
+    price_per_hour: "",
+    images: [],
+  });
+
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+  // ================= FETCH FIELDS =================
+  const fetchFields = async () => {
+    try {
+      const res = await API.get("/fields");
+
+      const data = Array.isArray(res.data)
+        ? res.data
+        : res.data?.fields || [];
+
+      setFields(data);
+    } catch (err) {
+      console.log(err);
+      setFields([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchFields();
+  }, []);
+
+  // ================= INPUT =================
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // ================= IMAGE UPLOAD =================
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const base64 = reader.result;
+
+      setPreviewImage(base64);
+
+      setFormData((prev) => ({
+        ...prev,
+        images: [base64],
+      }));
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  // ================= IMAGE URL =================
+  const handleImageUrl = (e) => {
+    const value = e.target.value;
+
+    setPreviewImage(value);
+
+    setFormData((prev) => ({
+      ...prev,
+      images: value ? [value] : [],
+    }));
+  };
+
+  // ================= OPEN ADD =================
+  const openAddModal = () => {
+    setEditingField(null);
+    setPreviewImage("");
+
+    setFormData({
+      name: "",
+      address: "",
+      type: "Sân 5",
+      description: "",
+      price_per_hour: "",
+      images: [],
+    });
+
+    setShowModal(true);
+  };
+
+  // ================= OPEN EDIT =================
+  const openEditModal = (field) => {
+    setEditingField(field);
+
+    const image = field.images?.[0] || "";
+
+    setPreviewImage(image);
+
+    setFormData({
+      name: field.name || "",
+      address: field.address || "",
+      type: field.type || "Sân 5",
+      description: field.description || "",
+      price_per_hour: field.price_per_hour || "",
+      images: field.images || [],
+    });
+
+    setShowModal(true);
+  };
+
+  // ================= SUBMIT =================
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const token = userInfo?.token;
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const payload = {
+        name: formData.name,
+        address: formData.address,
+        type: formData.type,
+        description: formData.description,
+        price_per_hour: Number(formData.price_per_hour),
+        images: formData.images,
+      };
+
+      if (editingField) {
+        await API.put(
+          `/fields/${editingField.id}`,
+          payload,
+          config
+        );
+
+        alert("Cập nhật thành công");
+      } else {
+        await API.post("/fields", payload, config);
+
+        alert("Thêm sân thành công");
+      }
+
+      setShowModal(false);
+      fetchFields();
+    } catch (err) {
+      console.log(err.response?.data);
+      alert("Lỗi server");
+    }
+  };
+
+  // ================= DELETE =================
+  const handleDelete = async (id) => {
+    const confirm = window.confirm("Xóa sân này?");
+    if (!confirm) return;
+
+    try {
+      const token = userInfo?.token;
+
+      await API.delete(`/fields/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setFields((prev) => prev.filter((f) => f.id !== id));
+    } catch (err) {
+      console.log(err);
+      alert("Xóa thất bại");
+    }
+  };
+
+  // ================= UI =================
+  return (
+    <div className="admin-layout">
+
+      {/* SIDEBAR */}
+      {/* SIDEBAR */}
+<div className="sidebar">
+
+  <Link to="/" className="navbar-logo admin-logo">
+            <FaFutbol className="logo-icon" />
+          
+            <div className="logo-text">
+              <span className="logo-title">SânBóngPro</span>
+              <small className="logo-sub">Booking System</small>
+            </div>
+          </Link>
+
+  <ul className="menu">
+
+    {/* DASHBOARD */}
+    <Link to="/admin">
+      <li>
+        <FaChartBar />
+        Dashboard
+      </li>
+    </Link>
+
+    {/* FIELDS */}
+    <Link to="/admin/AdminFields">
+      <li className="active">
+        <FaFutbol />
+        Quản lý sân bóng
+      </li>
+    </Link>
+
+    {/* BOOKINGS */}
+    <Link to="/admin/AdminBookings">
+      <li>
+        <FaClipboardList />
+        Đơn đặt
+      </li>
+    </Link>
+
+    {/* USERS */}
+    <Link to="/admin/AdminUsers">
+      <li>
+        <FaUsers />
+        Người dùng
+      </li>
+    </Link>
+    <Link to="/admin/AdminReviews">
+  <li>
+    <FaComments />
+    Đánh giá
+  </li>
+</Link>
+    <Link to="/admin/AdminVouchers">
+      <li>
+        <FaTicketAlt />
+        Mã giảm giá
+      </li>
+    </Link>
+    <Link to="/admin/AdminNotifications">
+      <li>
+        <FaBell />
+        Thông báo
+      </li>
+    </Link>
+  </ul>
+
+</div>
+
+      {/* MAIN */}
+
+      <div className="main-content">
+        <div className="page-header">
+        
+                  <h1>Quản lý người dùng</h1>
+        
+                  <button className="add-btn" onClick={openAddModal}>
+          + Thêm sân bóng
+        </button>
+        
+                </div>
+
+        
+
+        {/* TABLE */}
+        <div className="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Tên sân</th>
+                <th>Địa chỉ</th>
+                <th>Loại</th>
+                <th>Giá</th>
+                <th>Mô tả</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {fields.map((field) => (
+                <tr key={field.id}>
+                  <td>{field.name}</td>
+                  <td>{field.address}</td>
+                  <td>{field.type}</td>
+                  <td>{field.price_per_hour}</td>
+                  <td>{field.description}</td>
+
+                  <td>
+                    <FaEdit onClick={() => openEditModal(field)} />
+                    <FaTrash onClick={() => handleDelete(field.id)} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* MODAL */}
+{showModal && (
+  <div className="modal-overlay">
+    <div className="modal">
+
+      <div className="modal-header">
+        <h2>{editingField ? "Sửa sân" : "Thêm sân"}</h2>
+
+        <FaTimes onClick={() => setShowModal(false)} />
+      </div>
+
+      <form onSubmit={handleSubmit}>
+
+        <input
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          placeholder="Tên sân"
+        />
+
+        <input
+          name="address"
+          value={formData.address}
+          onChange={handleChange}
+          placeholder="Địa chỉ"
+        />
+
+        {/* ✅ FIX: THÊM LOẠI SÂN */}
+        <select
+          name="type"
+          value={formData.type}
+          onChange={handleChange}
+        >
+          <option value="Sân 5">Sân 5</option>
+          <option value="Sân 7">Sân 7</option>
+          <option value="Sân 11">Sân 11</option>
+        </select>
+
+        <input
+          name="price_per_hour"
+          value={formData.price_per_hour}
+          onChange={handleChange}
+          placeholder="Giá"
+          type="number"
+        />
+
+        <textarea
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          placeholder="Mô tả"
+        />
+
+        <input
+          value={formData.images?.[0] || ""}
+          onChange={handleImageUrl}
+          placeholder="Link ảnh"
+        />
+
+        <input type="file" onChange={handleImageUpload} />
+
+        {previewImage && (
+          <img src={previewImage} width="120" alt="" />
+        )}
+
+        <button type="submit">
+          {editingField ? "Cập nhật" : "Thêm"}
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+)}
+
+      </div>
+    </div>
+  );
+}
+
+export default AdminFields;
