@@ -1,0 +1,297 @@
+/* ================= PAGE ================= */
+
+.admin-notifications {
+  padding: 30px;
+}
+
+.notification-page-header {
+  margin-bottom: 25px;
+}
+
+.notification-page-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  font-size: 30px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.notification-page-header p {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+/* ================= FORM ================= */
+
+.notification-form {
+  background: #fff;
+
+  padding: 25px;
+
+  border-radius: 22px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  margin-bottom: 30px;
+}
+
+.notification-form input,
+.notification-form textarea,
+.notification-form select {
+  width: 100%;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 14px;
+
+  padding: 14px 16px;
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition: 0.25s;
+}
+
+.notification-form input:focus,
+.notification-form textarea:focus,
+.notification-form select:focus {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+}
+
+.notification-form textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.send-type-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.send-type-box label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.notification-form button {
+  height: 52px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: linear-gradient(
+    135deg,
+    #22c55e,
+    #16a34a
+  );
+
+  color: white;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.notification-form button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 20px rgba(
+      34,
+      197,
+      94,
+      0.25
+    );
+}
+
+.notification-form button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ================= LIST ================= */
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.notification-card {
+  background: #fff;
+
+  padding: 22px;
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 8px 25px rgba(
+      0,
+      0,
+      0,
+      0.05
+    );
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  transition: 0.25s;
+}
+
+.notification-card:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 15px 30px rgba(
+      0,
+      0,
+      0,
+      0.08
+    );
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-content h4 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+
+  margin-bottom: 8px;
+}
+
+.notification-content p {
+  font-size: 15px;
+  color: #374151;
+
+  line-height: 1.6;
+
+  margin-bottom: 12px;
+}
+
+/* ================= META ================= */
+
+.notification-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  flex-wrap: wrap;
+}
+
+.notification-date {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.notification-badge {
+  padding: 5px 12px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.notification-badge.global {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.notification-badge.single {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+/* ================= DELETE ================= */
+
+.delete-btn {
+  width: 45px;
+  height: 45px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: #fef2f2;
+
+  color: #ef4444;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+
+  flex-shrink: 0;
+}
+
+.delete-btn:hover {
+  background: #ef4444;
+  color: white;
+
+  transform: scale(1.05);
+}
+
+/* ================= EMPTY ================= */
+
+.empty-box {
+  background: white;
+
+  padding: 50px;
+
+  border-radius: 20px;
+
+  text-align: center;
+
+  color: #9ca3af;
+
+  font-size: 15px;
+
+  box-shadow:
+    0 8px 25px rgba(
+      0,
+      0,
+      0,
+      0.05
+    );
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .notification-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .delete-btn {
+    width: 100%;
+  }
+
+  .notification-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

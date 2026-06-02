@@ -1,7 +1,7 @@
 // src/pages/Register.js
 
 import React, { useState } from "react";
-import "./Auth.css";
+import "./style/Auth.css";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../services/api";
 
@@ -122,7 +122,7 @@ function Register() {
       if (err.response) {
         alert(
           err.response.data?.message ||
-            "Lỗi server"
+          "Lỗi server"
         );
       } else if (err.request) {
         alert(

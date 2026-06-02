@@ -3,7 +3,7 @@
 import React, {
   useState,
 } from "react";
-import "./Auth.css";
+import "./style/Auth.css";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../services/api";
 import {
@@ -35,79 +35,79 @@ function Login() {
   const [loading, setLoading] =
     useState(false);
   // =========================
-// GOOGLE LOGIN
-// =========================
+  // GOOGLE LOGIN
+  // =========================
 
-const googleLogin =
-  useGoogleLogin({
+  const googleLogin =
+    useGoogleLogin({
 
-    onSuccess: async (
-      tokenResponse
-    ) => {
+      onSuccess: async (
+        tokenResponse
+      ) => {
 
-      try {
+        try {
 
-        const res =
-          await API.post(
-            "/auth/google",
-            {
-              access_token:
-                tokenResponse.access_token,
-            }
+          const res =
+            await API.post(
+              "/auth/google",
+              {
+                access_token:
+                  tokenResponse.access_token,
+              }
+            );
+
+          localStorage.setItem(
+            "token",
+            res.data.token
           );
 
-        localStorage.setItem(
-          "token",
-          res.data.token
-        );
+          localStorage.setItem(
+            "userInfo",
+            JSON.stringify({
+              id:
+                res.data.user.id,
 
-        localStorage.setItem(
-          "userInfo",
-          JSON.stringify({
-            id:
-              res.data.user.id,
+              token:
+                res.data.token,
 
-            token:
-              res.data.token,
+              name:
+                res.data.user.name,
 
-            name:
-              res.data.user.name,
+              email:
+                res.data.user.email,
 
-            email:
-              res.data.user.email,
+              role:
+                res.data.user.role,
+            })
+          );
 
-            role:
-              res.data.user.role,
-          })
-        );
+          alert(
+            "Đăng nhập Google thành công"
+          );
+
+          navigate("/");
+
+        } catch (err) {
+
+          console.log(
+            "GOOGLE LOGIN ERROR:",
+            err.response?.data || err
+          );
+
+          alert(
+            err.response?.data?.message ||
+            "Google Login thất bại"
+          );
+        }
+      },
+
+      onError: () => {
 
         alert(
-          "Đăng nhập Google thành công"
-        );
-
-        navigate("/");
-
-      } catch (err) {
-
-        console.log(
-          "GOOGLE LOGIN ERROR:",
-          err.response?.data || err
-        );
-
-        alert(
-          err.response?.data?.message ||
           "Google Login thất bại"
         );
-      }
-    },
-
-    onError: () => {
-
-      alert(
-        "Google Login thất bại"
-      );
-    },
-  });
+      },
+    });
   // =========================
   // LOGIN
   // =========================
@@ -151,19 +151,19 @@ const googleLogin =
       // =========================
 
       localStorage.setItem(
-  "userInfo",
-  JSON.stringify({
-    id: res.data.user.id,
+        "userInfo",
+        JSON.stringify({
+          id: res.data.user.id,
 
-    token: res.data.token,
+          token: res.data.token,
 
-    name: res.data.user.name,
+          name: res.data.user.name,
 
-    email: res.data.user.email,
+          email: res.data.user.email,
 
-    role: res.data.user.role,
-  })
-);
+          role: res.data.user.role,
+        })
+      );
       // SAVE TOKEN
 
       localStorage.setItem(
@@ -175,7 +175,7 @@ const googleLogin =
 
       alert(
         res.data.message ||
-          "Đăng nhập thành công"
+        "Đăng nhập thành công"
       );
 
       navigate("/");
@@ -326,15 +326,15 @@ const googleLogin =
           {/* GOOGLE */}
 
           <button
-  type="button"
-  className="google-btn"
-  onClick={() =>
-    googleLogin()
-  }
->
-  <FaGoogle />
-  Đăng nhập bằng Google
-</button>
+            type="button"
+            className="google-btn"
+            onClick={() =>
+              googleLogin()
+            }
+          >
+            <FaGoogle />
+            Đăng nhập bằng Google
+          </button>
 
           {/* REGISTER */}
 

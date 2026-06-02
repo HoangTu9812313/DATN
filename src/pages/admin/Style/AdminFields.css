@@ -312,3 +312,29 @@ td svg:last-child {
     width: 92%;
   }
 }
+.pricing-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.pricing-list {
+  margin-top: 15px;
+}
+
+.pricing-item {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.pricing-item strong {
+  display: block;
+}
+
+.pricing-item small {
+  color: #666;
+}

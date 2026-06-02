@@ -3,7 +3,7 @@ import React, {
   useState,
 } from "react";
 
-import "./FieldDetail.css";
+import "./style/FieldDetail.css";
 
 import {
   useParams,
@@ -31,7 +31,7 @@ function FieldDetail() {
   const [slots, setSlots] =
     useState([]);
   const [pricingRules, setPricingRules] =
-  useState([]);
+    useState([]);
   const [loading, setLoading] =
     useState(true);
 
@@ -68,19 +68,19 @@ function FieldDetail() {
     reviewLoading,
     setReviewLoading,
   ] = useState(false);
-// ================= VOUCHER =================
+  // ================= VOUCHER =================
 
-const [voucherCode, setVoucherCode] =
-  useState("");
+  const [voucherCode, setVoucherCode] =
+    useState("");
 
-const [voucher, setVoucher] =
-  useState(null);
+  const [voucher, setVoucher] =
+    useState(null);
 
-const [discountAmount, setDiscountAmount] =
-  useState(0);
+  const [discountAmount, setDiscountAmount] =
+    useState(0);
 
-const [voucherLoading, setVoucherLoading] =
-  useState(false);
+  const [voucherLoading, setVoucherLoading] =
+    useState(false);
   // ================= DATE =================
 
   const formatDate = (
@@ -116,30 +116,30 @@ const [voucherLoading, setVoucherLoading] =
       .toString()
       .slice(0, 5);
   };
-const getPriceForTime = (
-  startTime,
-  duration
-) => {
+  const getPriceForTime = (
+    startTime,
+    duration
+  ) => {
 
-  const rule =
-    pricingRules.find(
-      (p) =>
-        startTime >= p.start_time &&
-        startTime < p.end_time
-    );
+    const rule =
+      pricingRules.find(
+        (p) =>
+          startTime >= p.start_time &&
+          startTime < p.end_time
+      );
 
-  if (rule) {
+    if (rule) {
+      return (
+        Number(rule.price_per_hour) *
+        (duration / 60)
+      );
+    }
+
     return (
-      Number(rule.price_per_hour) *
+      Number(field?.price_per_hour || 0) *
       (duration / 60)
     );
-  }
-
-  return (
-    Number(field?.price_per_hour || 0) *
-    (duration / 60)
-  );
-};
+  };
   // ================= GENERATE SLOT =================
 
   const generateSlots = (
@@ -196,21 +196,21 @@ const getPriceForTime = (
       const em = end % 60;
 
       const startTime =
-  `${String(sh).padStart(2, "0")}:${String(sm).padStart(2, "0")}`;
+        `${String(sh).padStart(2, "0")}:${String(sm).padStart(2, "0")}`;
 
-const endTime =
-  `${String(eh).padStart(2, "0")}:${String(em).padStart(2, "0")}`;
+      const endTime =
+        `${String(eh).padStart(2, "0")}:${String(em).padStart(2, "0")}`;
 
-result.push({
-  start_time: startTime,
+      result.push({
+        start_time: startTime,
 
-  end_time: endTime,
+        end_time: endTime,
 
-  price: getPriceForTime(
-    startTime,
-    slotDuration
-  ),
-});
+        price: getPriceForTime(
+          startTime,
+          slotDuration
+        ),
+      });
     }
 
     return result;
@@ -243,50 +243,50 @@ result.push({
     };
 
 
-    const fetchPricing = async () => {
-  try {
-    const res = await API.get(
-      `/field-pricing/${id}`
-    );
-
-    console.log(
-      "PRICING DATA:",
-      res.data
-    );
-
-    setPricingRules(
-      res.data.pricing || []
-    );
-  } catch (err) {
-    console.log(
-      "FETCH PRICING ERROR",
-      err
-    );
-  }
-};
-  // ================= FETCH REVIEW =================
-
-  const fetchReviews =
-  async () => {
+  const fetchPricing = async () => {
     try {
-
-      const res =
-        await API.get(
-          `/reviews/field/${id}`
-        );
-
-      setReviews(
-        res.data || []
+      const res = await API.get(
+        `/field-pricing/${id}`
       );
 
-    } catch (err) {
-
       console.log(
-        "FETCH REVIEW ERROR:",
+        "PRICING DATA:",
+        res.data
+      );
+
+      setPricingRules(
+        res.data.pricing || []
+      );
+    } catch (err) {
+      console.log(
+        "FETCH PRICING ERROR",
         err
       );
     }
   };
+  // ================= FETCH REVIEW =================
+
+  const fetchReviews =
+    async () => {
+      try {
+
+        const res =
+          await API.get(
+            `/reviews/field/${id}`
+          );
+
+        setReviews(
+          res.data || []
+        );
+
+      } catch (err) {
+
+        console.log(
+          "FETCH REVIEW ERROR:",
+          err
+        );
+      }
+    };
 
   useEffect(() => {
     const load =
@@ -308,16 +308,16 @@ result.push({
   // ================= UPDATE SLOT =================
 
   useEffect(() => {
-  if (field) {
-    setSlots(
-      generateSlots(field)
-    );
-  }
-}, [
-  duration,
-  field,
-  pricingRules,
-]);
+    if (field) {
+      setSlots(
+        generateSlots(field)
+      );
+    }
+  }, [
+    duration,
+    field,
+    pricingRules,
+  ]);
 
   // ================= FETCH BOOKINGS =================
 
@@ -365,9 +365,9 @@ result.push({
 
           if (
             b.status ===
-              "booked" ||
+            "booked" ||
             b.status ===
-              "completed"
+            "completed"
           ) {
             grouped[
               date
@@ -404,20 +404,20 @@ result.push({
           grouped[
             date
           ].booked = [
-            ...new Set(
-              grouped[date]
-                .booked
-            ),
-          ];
+              ...new Set(
+                grouped[date]
+                  .booked
+              ),
+            ];
 
           grouped[
             date
           ].holding = [
-            ...new Set(
-              grouped[date]
-                .holding
-            ),
-          ];
+              ...new Set(
+                grouped[date]
+                  .holding
+              ),
+            ];
         });
 
         setBookingsByDate(
@@ -429,14 +429,14 @@ result.push({
             bookings.filter(
               (b) =>
                 b.status ===
-                  "holding" &&
+                "holding" &&
                 Number(
                   b.user_id ||
-                    b.userId
+                  b.userId
                 ) ===
-                  Number(
-                    user.id
-                  )
+                Number(
+                  user.id
+                )
             );
 
           setSelectedTimes(
@@ -481,7 +481,7 @@ result.push({
   ) => {
     const data =
       bookingsByDate?.[
-        formattedDate
+      formattedDate
       ];
 
     if (!data)
@@ -501,7 +501,7 @@ result.push({
   ) => {
     const data =
       bookingsByDate?.[
-        formattedDate
+      formattedDate
       ];
 
     if (!data)
@@ -536,8 +536,8 @@ result.push({
         const slotTime =
           normalizeTime(
             data.time ||
-              data.start_time ||
-              data.startTime
+            data.start_time ||
+            data.startTime
           );
 
         if (!slotTime)
@@ -547,7 +547,7 @@ result.push({
           (prev) => {
             const dayData =
               prev[
-                formattedDate
+              formattedDate
               ] || {
                 booked: [],
                 holding: [],
@@ -561,26 +561,26 @@ result.push({
                 ...prev,
 
                 [formattedDate]:
-                  {
-                    booked:
-                      [
-                        ...new Set(
-                          [
-                            ...dayData.booked,
-                            slotTime,
-                          ]
-                        ),
-                      ],
-
-                    holding:
-                      dayData.holding.filter(
-                        (
-                          t
-                        ) =>
-                          t !==
-                          slotTime
+                {
+                  booked:
+                    [
+                      ...new Set(
+                        [
+                          ...dayData.booked,
+                          slotTime,
+                        ]
                       ),
-                  },
+                    ],
+
+                  holding:
+                    dayData.holding.filter(
+                      (
+                        t
+                      ) =>
+                        t !==
+                        slotTime
+                    ),
+                },
               };
             }
 
@@ -592,51 +592,51 @@ result.push({
                 ...prev,
 
                 [formattedDate]:
-                  {
-                    ...dayData,
+                {
+                  ...dayData,
 
-                    holding:
-                      [
-                        ...new Set(
-                          [
-                            ...dayData.holding,
-                            slotTime,
-                          ]
-                        ),
-                      ],
-                  },
+                  holding:
+                    [
+                      ...new Set(
+                        [
+                          ...dayData.holding,
+                          slotTime,
+                        ]
+                      ),
+                    ],
+                },
               };
             }
 
             if (
               data.status ===
-                "available" ||
+              "available" ||
               data.status ===
-                "cancelled"
+              "cancelled"
             ) {
               return {
                 ...prev,
 
                 [formattedDate]:
-                  {
-                    booked:
-                      dayData.booked.filter(
-                        (
-                          t
-                        ) =>
-                          t !==
-                          slotTime
-                      ),
+                {
+                  booked:
+                    dayData.booked.filter(
+                      (
+                        t
+                      ) =>
+                        t !==
+                        slotTime
+                    ),
 
-                    holding:
-                      dayData.holding.filter(
-                        (
-                          t
-                        ) =>
-                          t !==
-                          slotTime
-                      ),
-                  },
+                  holding:
+                    dayData.holding.filter(
+                      (
+                        t
+                      ) =>
+                        t !==
+                        slotTime
+                    ),
+                },
               };
             }
 
@@ -804,127 +804,127 @@ result.push({
         alert(
           err.response?.data
             ?.message ||
-            "Không thể giữ sân"
+          "Không thể giữ sân"
         );
       }
     };
 
   // ================= BOOKING =================
-// ================= TOTAL =================
+  // ================= TOTAL =================
 
-const subtotal = selectedTimes.reduce(
-  (t, s) =>
-    t + Number(s.price || 0),
-  0
-);
+  const subtotal = selectedTimes.reduce(
+    (t, s) =>
+      t + Number(s.price || 0),
+    0
+  );
 
-const finalTotal =
-  subtotal - discountAmount > 0
-    ? subtotal - discountAmount
-    : 0;
+  const finalTotal =
+    subtotal - discountAmount > 0
+      ? subtotal - discountAmount
+      : 0;
   // ================= APPLY VOUCHER =================
 
-// ================= APPLY VOUCHER =================
+  // ================= APPLY VOUCHER =================
 
-const handleApplyVoucher =
-  async () => {
+  const handleApplyVoucher =
+    async () => {
 
-    if (!voucherCode.trim()) {
+      if (!voucherCode.trim()) {
 
-      return alert(
-        "Vui lòng nhập mã voucher"
-      );
-    }
+        return alert(
+          "Vui lòng nhập mã voucher"
+        );
+      }
 
-    try {
+      try {
 
-      setVoucherLoading(true);
+        setVoucherLoading(true);
 
-      const user =
-        JSON.parse(
-          localStorage.getItem(
-            "userInfo"
+        const user =
+          JSON.parse(
+            localStorage.getItem(
+              "userInfo"
+            )
+          );
+
+        const res =
+          await API.post(
+            "/vouchers/validate",
+            {
+              code:
+                voucherCode.trim(),
+
+              amount:
+                Number(subtotal),
+
+              userId:
+                user?.id,
+            }
+          );
+
+        const data =
+          res.data;
+
+        console.log(
+          "VOUCHER RESPONSE:",
+          data
+        );
+
+        // ================= INVALID =================
+
+        if (!data.valid) {
+
+          setVoucher(null);
+
+          setDiscountAmount(0);
+
+          return alert(
+            data.message ||
+            "Voucher không hợp lệ"
+          );
+        }
+
+        // ================= SUCCESS =================
+
+        setVoucher(
+          data.voucher
+        );
+
+        // QUAN TRỌNG
+        setDiscountAmount(
+          Number(
+            data.discount || 0
           )
         );
 
-      const res =
-        await API.post(
-          "/vouchers/validate",
-          {
-            code:
-              voucherCode.trim(),
-
-            amount:
-              Number(subtotal),
-
-            userId:
-              user?.id,
-          }
+        alert(
+          `Giảm ${Number(
+            data.discount || 0
+          ).toLocaleString()}đ`
         );
 
-      const data =
-        res.data;
+      } catch (err) {
 
-      console.log(
-        "VOUCHER RESPONSE:",
-        data
-      );
-
-      // ================= INVALID =================
-
-      if (!data.valid) {
+        console.log(
+          "VOUCHER ERROR:",
+          err
+        );
 
         setVoucher(null);
 
         setDiscountAmount(0);
 
-        return alert(
-          data.message ||
+        alert(
+          err.response?.data
+            ?.message ||
           "Voucher không hợp lệ"
         );
+
+      } finally {
+
+        setVoucherLoading(false);
       }
-
-      // ================= SUCCESS =================
-
-      setVoucher(
-        data.voucher
-      );
-
-      // QUAN TRỌNG
-      setDiscountAmount(
-        Number(
-          data.discount || 0
-        )
-      );
-
-      alert(
-        `Giảm ${Number(
-          data.discount || 0
-        ).toLocaleString()}đ`
-      );
-
-    } catch (err) {
-
-      console.log(
-        "VOUCHER ERROR:",
-        err
-      );
-
-      setVoucher(null);
-
-      setDiscountAmount(0);
-
-      alert(
-        err.response?.data
-          ?.message ||
-        "Voucher không hợp lệ"
-      );
-
-    } finally {
-
-      setVoucherLoading(false);
-    }
-  };
+    };
   const handleBooking =
     () => {
       const user =
@@ -972,96 +972,96 @@ const handleApplyVoucher =
 
   // ================= CREATE REVIEW =================
 
-const handleCreateReview =
-  async () => {
-    try {
-      const user =
-        JSON.parse(
-          localStorage.getItem(
-            "userInfo"
-          )
-        );
+  const handleCreateReview =
+    async () => {
+      try {
+        const user =
+          JSON.parse(
+            localStorage.getItem(
+              "userInfo"
+            )
+          );
 
-      if (!user) {
-        return alert(
-          "Vui lòng đăng nhập"
-        );
-      }
+        if (!user) {
+          return alert(
+            "Vui lòng đăng nhập"
+          );
+        }
 
-      if (!comment.trim()) {
-        return alert(
-          "Vui lòng nhập nội dung đánh giá"
-        );
-      }
+        if (!comment.trim()) {
+          return alert(
+            "Vui lòng nhập nội dung đánh giá"
+          );
+        }
 
-      if (!user.id) {
-        return alert(
-          "Không tìm thấy user id"
-        );
-      }
+        if (!user.id) {
+          return alert(
+            "Không tìm thấy user id"
+          );
+        }
 
-      setReviewLoading(true);
+        setReviewLoading(true);
 
-      const payload = {
-        fieldId: Number(id),
+        const payload = {
+          fieldId: Number(id),
 
-        userId: Number(
-          user.id
-        ),
+          userId: Number(
+            user.id
+          ),
 
-        rating: Number(
-          rating
-        ),
+          rating: Number(
+            rating
+          ),
 
-        comment:
-          comment.trim(),
-      };
+          comment:
+            comment.trim(),
+        };
 
-      console.log(
-        "REVIEW PAYLOAD:",
-        payload
-      );
-
-      const res =
-        await API.post(
-          "/reviews",
+        console.log(
+          "REVIEW PAYLOAD:",
           payload
         );
 
-      console.log(
-        "REVIEW SUCCESS:",
-        res.data
-      );
+        const res =
+          await API.post(
+            "/reviews",
+            payload
+          );
 
-      setComment("");
+        console.log(
+          "REVIEW SUCCESS:",
+          res.data
+        );
 
-      setRating(5);
+        setComment("");
 
-      await fetchReviews();
+        setRating(5);
 
-      alert(
-        "Đánh giá thành công"
-      );
-    } catch (err) {
-      console.log(
-        "CREATE REVIEW ERROR:",
-        err
-      );
+        await fetchReviews();
 
-      console.log(
-        "ERROR RESPONSE:",
-        err.response?.data
-      );
+        alert(
+          "Đánh giá thành công"
+        );
+      } catch (err) {
+        console.log(
+          "CREATE REVIEW ERROR:",
+          err
+        );
 
-      alert(
-        err.response?.data
-          ?.message ||
+        console.log(
+          "ERROR RESPONSE:",
+          err.response?.data
+        );
+
+        alert(
+          err.response?.data
+            ?.message ||
           "Không thể gửi đánh giá"
-      );
-    } finally {
-      setReviewLoading(false);
-    }
-  };
+        );
+      } finally {
+        setReviewLoading(false);
+      }
+    };
   // ================= UI =================
 
   const getDaysInMonth =
@@ -1142,6 +1142,7 @@ const handleCreateReview =
       </div>
 
       <div className="detail-container">
+
         <div className="detail-left">
           {/* SLOT */}
 
@@ -1154,7 +1155,7 @@ const handleCreateReview =
               <button
                 className={
                   duration ===
-                  60
+                    60
                     ? "active"
                     : ""
                 }
@@ -1170,7 +1171,7 @@ const handleCreateReview =
               <button
                 className={
                   duration ===
-                  90
+                    90
                     ? "active"
                     : ""
                 }
@@ -1207,28 +1208,25 @@ const handleCreateReview =
                     <div
                       key={i}
                       className={`time-slot
-                      ${
-                        isBooked(
-                          slot
-                        )
+                      ${isBooked(
+                        slot
+                      )
                           ? "booked-slot"
                           : ""
-                      }
+                        }
 
-                      ${
-                        isHolding(
+                      ${isHolding(
                           slot
                         ) &&
-                        !selected
+                          !selected
                           ? "holding-slot"
                           : ""
-                      }
+                        }
 
-                      ${
-                        selected
+                      ${selected
                           ? "selected"
                           : ""
-                      }`}
+                        }`}
                       onClick={() => {
                         if (
                           isBooked(
@@ -1262,25 +1260,25 @@ const handleCreateReview =
                       </div>
 
                       <div>
-  {Number(
-    slot.price
-  ).toLocaleString()}
-  đ
+                        {Number(
+                          slot.price
+                        ).toLocaleString()}
+                        đ
 
-  {pricingRules.some(
-    (p) =>
-      slot.start_time >=
-        p.start_time &&
-      slot.start_time <
-        p.end_time
-  ) && (
-    <span
-      className="golden-badge"
-    >
-      🔥 Giờ vàng
-    </span>
-  )}
-</div>
+                        {pricingRules.some(
+                          (p) =>
+                            slot.start_time >=
+                            p.start_time &&
+                            slot.start_time <
+                            p.end_time
+                        ) && (
+                            <span
+                              className="golden-badge"
+                            >
+                              🔥 Giờ vàng
+                            </span>
+                          )}
+                      </div>
                     </div>
                   );
                 }
@@ -1303,12 +1301,11 @@ const handleCreateReview =
                 ) => (
                   <div
                     key={i}
-                    className={`day ${
-                      selectedDate.getDate() ===
-                      day
+                    className={`day ${selectedDate.getDate() ===
+                        day
                         ? "active-day"
                         : ""
-                    }`}
+                      }`}
                     onClick={() => {
                       if (
                         !day
@@ -1345,12 +1342,12 @@ const handleCreateReview =
 
             <div className="review-form">
               <select
-  className="rating-select"
-  value={rating}
-  onChange={(e) =>
-    setRating(Number(e.target.value))
-  }
->
+                className="rating-select"
+                value={rating}
+                onChange={(e) =>
+                  setRating(Number(e.target.value))
+                }
+              >
                 <option value={5}>
                   ⭐⭐⭐⭐⭐
                 </option>
@@ -1383,19 +1380,19 @@ const handleCreateReview =
               />
 
               <button
-  className="review-submit-btn"
-  onClick={handleCreateReview}
-  disabled={reviewLoading}
->
-  {reviewLoading
-    ? "Đang gửi..."
-    : "Gửi đánh giá"}
-</button>
+                className="review-submit-btn"
+                onClick={handleCreateReview}
+                disabled={reviewLoading}
+              >
+                {reviewLoading
+                  ? "Đang gửi..."
+                  : "Gửi đánh giá"}
+              </button>
             </div>
 
             <div className="review-list">
               {reviews.length >
-              0 ? (
+                0 ? (
                 reviews.map(
                   (
                     review
@@ -1451,139 +1448,144 @@ const handleCreateReview =
           </div>
         </div>
 
-          {/* RIGHT */}
+        {/* RIGHT */}
 
-          <div className="detail-right">
-            <div className="booking-card">
-              <h2>
-                {field.name}
-              </h2>
+        <div className="detail-right">
+          <div className="booking-card">
+            <h2>
+              {field.name}
+            </h2>
+            <div className="field-description">
+              <p>
+                {field.description ||
+                  "Chưa có mô tả cho sân bóng này"}
+              </p>
+            </div>
+            <div>
+              📅{" "}
+              {formattedDate}
+            </div>
 
-              <div>
-                📅{" "}
-                {formattedDate}
-              </div>
+            <div>
+              ⏱️{" "}
+              {duration} phút
+            </div>
 
-              <div>
-                ⏱️{" "}
-                {duration} phút
-              </div>
-
-              <div>
-                🕒{" "}
-                {selectedTimes.length >
+            <div>
+              🕒{" "}
+              {selectedTimes.length >
                 0
-                  ? selectedTimes.map(
-                      (
-                        slot,
-                        i
-                      ) => (
-                        <div
-                          key={i}
-                        >
-                          {
-                            slot.start_time
-                          }{" "}
-                          -{" "}
-                          {
-                            slot.end_time
-                          }
-                        </div>
-                      )
-                    )
-                  : "Chưa chọn"}
-              </div>
-
-              <div>
-                💰{" "}
-                {selectedTimes
-                  .reduce(
-                    (
-                      t,
-                      s
-                    ) =>
-                      t +
-                      Number(
-                        s.price
-                      ),
-                    0
+                ? selectedTimes.map(
+                  (
+                    slot,
+                    i
+                  ) => (
+                    <div
+                      key={i}
+                    >
+                      {
+                        slot.start_time
+                      }{" "}
+                      -{" "}
+                      {
+                        slot.end_time
+                      }
+                    </div>
                   )
-                  .toLocaleString()}
-                đ
-              </div>
-              {/* VOUCHER */}
+                )
+                : "Chưa chọn"}
+            </div>
 
-<div className="voucher-box">
+            <div>
+              💰{" "}
+              {selectedTimes
+                .reduce(
+                  (
+                    t,
+                    s
+                  ) =>
+                    t +
+                    Number(
+                      s.price
+                    ),
+                  0
+                )
+                .toLocaleString()}
+              đ
+            </div>
+            {/* VOUCHER */}
 
-  <input
-    type="text"
-    placeholder="Nhập mã giảm giá"
-    value={voucherCode}
-    onChange={(e) =>
-      setVoucherCode(
-        e.target.value
-      )
-    }
-  />
+            <div className="voucher-box">
 
-  <button
-    className="voucher-btn"
-    onClick={
-      handleApplyVoucher
-    }
-    disabled={
-      voucherLoading
-    }
-  >
-    {voucherLoading
-      ? "Đang kiểm tra..."
-      : "Áp dụng"}
-  </button>
+              <input
+                type="text"
+                placeholder="Nhập mã giảm giá"
+                value={voucherCode}
+                onChange={(e) =>
+                  setVoucherCode(
+                    e.target.value
+                  )
+                }
+              />
 
-</div>
-
-{/* PRICE */}
-
-<div className="price-summary">
-
-  <div>
-    <span>Tạm tính:</span>
-
-    <strong>
-      {subtotal.toLocaleString()}đ
-    </strong>
-  </div>
-
-  <div>
-    <span>Giảm giá:</span>
-
-    <strong
-      style={{
-        color: "#22c55e",
-      }}
-    >
-      - {discountAmount.toLocaleString()}đ
-    </strong>
-  </div>
-
-  <div className="final-total">
-    <span>Tổng tiền:</span>
-
-    <strong>
-      {finalTotal.toLocaleString()}đ
-    </strong>
-  </div>
-
-</div>
               <button
+                className="voucher-btn"
                 onClick={
-                  handleBooking
+                  handleApplyVoucher
+                }
+                disabled={
+                  voucherLoading
                 }
               >
-                Đặt sân ngay
+                {voucherLoading
+                  ? "Đang kiểm tra..."
+                  : "Áp dụng"}
               </button>
+
             </div>
+
+            {/* PRICE */}
+
+            <div className="price-summary">
+
+              <div>
+                <span>Tạm tính:</span>
+
+                <strong>
+                  {subtotal.toLocaleString()}đ
+                </strong>
+              </div>
+
+              <div>
+                <span>Giảm giá:</span>
+
+                <strong
+                  style={{
+                    color: "#22c55e",
+                  }}
+                >
+                  - {discountAmount.toLocaleString()}đ
+                </strong>
+              </div>
+
+              <div className="final-total">
+                <span>Tổng tiền:</span>
+
+                <strong>
+                  {finalTotal.toLocaleString()}đ
+                </strong>
+              </div>
+
+            </div>
+            <button
+              onClick={
+                handleBooking
+              }
+            >
+              Đặt sân ngay
+            </button>
           </div>
+        </div>
       </div>
     </div>
   );

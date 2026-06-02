@@ -3,7 +3,7 @@ import React, {
   useState,
 } from "react";
 
-import "./AdminVoucher.css";
+import "./Style/AdminVoucher.css";
 import {
   FaFutbol,
   FaChartBar,
@@ -322,13 +322,13 @@ function AdminVouchers() {
       <div className="sidebar">
 
         <Link to="/" className="navbar-logo admin-logo">
-                  <FaFutbol className="logo-icon" />
-                
-                  <div className="logo-text">
-                    <span className="logo-title">SânBóngPro</span>
-                    <small className="logo-sub">Booking System</small>
-                  </div>
-                </Link>
+          <FaFutbol className="logo-icon" />
+
+          <div className="logo-text">
+            <span className="logo-title">SânBóngPro</span>
+            <small className="logo-sub">Booking System</small>
+          </div>
+        </Link>
 
         <ul className="menu">
 
@@ -445,111 +445,111 @@ function AdminVouchers() {
               {vouchers.map(
                 (voucher) => (
 
-                <tr
-                  key={voucher.id}
-                >
+                  <tr
+                    key={voucher.id}
+                  >
 
-                  <td>
-                    {voucher.code}
-                  </td>
+                    <td>
+                      {voucher.code}
+                    </td>
 
-                  <td>
-                    {voucher.type}
-                  </td>
+                    <td>
+                      {voucher.type}
+                    </td>
 
-                  <td>
-                    {voucher.value}
-                  </td>
+                    <td>
+                      {voucher.value}
+                    </td>
 
-                  <td>
-                    {voucher.minAmount}
-                  </td>
+                    <td>
+                      {voucher.minAmount}
+                    </td>
 
-                  <td>
-                    {voucher.maxDiscount}
-                  </td>
+                    <td>
+                      {voucher.maxDiscount}
+                    </td>
 
-                  <td>
-                    {voucher.usageLimit}
-                  </td>
+                    <td>
+                      {voucher.usageLimit}
+                    </td>
 
-                  <td>
+                    <td>
 
-                    {voucher.startDate
-                      ? new Date(
+                      {voucher.startDate
+                        ? new Date(
                           voucher.startDate
                         ).toLocaleDateString(
                           "vi-VN"
                         )
-                      : ""}
+                        : ""}
 
-                  </td>
+                    </td>
 
-                  <td>
+                    <td>
 
-                    {voucher.endDate
-                      ? new Date(
+                      {voucher.endDate
+                        ? new Date(
                           voucher.endDate
                         ).toLocaleDateString(
                           "vi-VN"
                         )
-                      : ""}
+                        : ""}
 
-                  </td>
+                    </td>
 
-                  <td>
+                    <td>
 
-                    {voucher.isActive
-                      ? "Hoạt động"
-                      : "Ẩn"}
+                      {voucher.isActive
+                        ? "Hoạt động"
+                        : "Ẩn"}
 
-                  </td>
+                    </td>
 
-                  <td>
+                    <td>
 
-                    {voucher.isOneTimePerUser
-                      ? "Có"
-                      : "Không"}
+                      {voucher.isOneTimePerUser
+                        ? "Có"
+                        : "Không"}
 
-                  </td>
+                    </td>
 
-                  <td
-                    style={{
-                      display: "flex",
-                      gap: "12px",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-
-                    <FaEdit
+                    <td
                       style={{
-                        cursor: "pointer",
-                        color: "#2563eb",
+                        display: "flex",
+                        gap: "12px",
+                        justifyContent: "center",
+                        alignItems: "center",
                       }}
-                      onClick={() =>
-                        openEditModal(
-                          voucher
-                        )
-                      }
-                    />
+                    >
 
-                    <FaTrash
-                      style={{
-                        cursor: "pointer",
-                        color: "red",
-                      }}
-                      onClick={() =>
-                        handleDelete(
-                          voucher.id
-                        )
-                      }
-                    />
+                      <FaEdit
+                        style={{
+                          cursor: "pointer",
+                          color: "#2563eb",
+                        }}
+                        onClick={() =>
+                          openEditModal(
+                            voucher
+                          )
+                        }
+                      />
 
-                  </td>
+                      <FaTrash
+                        style={{
+                          cursor: "pointer",
+                          color: "red",
+                        }}
+                        onClick={() =>
+                          handleDelete(
+                            voucher.id
+                          )
+                        }
+                      />
 
-                </tr>
-              ))}
+                    </td>
+
+                  </tr>
+                ))}
 
             </tbody>
 

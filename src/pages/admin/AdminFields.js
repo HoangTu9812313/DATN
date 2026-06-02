@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import "./AdminFields.css";
+import "./Style/AdminFields.css";
 import {
   FaFutbol,
   FaChartBar,
@@ -23,7 +23,14 @@ function AdminFields() {
   const [showModal, setShowModal] = useState(false);
   const [editingField, setEditingField] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
+  const [pricingList, setPricingList] = useState([]);
 
+  const [pricingForm, setPricingForm] = useState({
+    start_time: "",
+    end_time: "",
+    price_per_hour: "",
+    label: "",
+  });
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -54,7 +61,67 @@ function AdminFields() {
   useEffect(() => {
     fetchFields();
   }, []);
+  // ================= FETCH PRICING =================
+  const fetchPricing = async (fieldId) => {
+    try {
+      const res = await API.get(`/field-pricing/${fieldId}`);
 
+      setPricingList(res.data?.pricing || []);
+    } catch (err) {
+      console.log(err);
+      setPricingList([]);
+    }
+  };
+
+  // ================= CHANGE PRICING =================
+  const handlePricingChange = (e) => {
+    setPricingForm({
+      ...pricingForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // ================= ADD PRICING =================
+  const handleAddPricing = async () => {
+    if (!editingField) {
+      alert("Vui lòng lưu sân trước");
+      return;
+    }
+
+    try {
+      const token = userInfo?.token;
+
+      await API.post(
+        "/field-pricing",
+        {
+          fieldId: editingField.id,
+          start_time: pricingForm.start_time,
+          end_time: pricingForm.end_time,
+          price_per_hour: Number(pricingForm.price_per_hour),
+          label: pricingForm.label,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      await fetchPricing(editingField.id);
+
+      setPricingForm({
+        start_time: "",
+        end_time: "",
+        price_per_hour: "",
+        label: "",
+      });
+
+      alert("Thêm khung giá thành công");
+    } catch (err) {
+      console.log(err);
+      alert("Thêm khung giá thất bại");
+    }
+  };
   // ================= INPUT =================
   const handleChange = (e) => {
     setFormData({
@@ -114,7 +181,7 @@ function AdminFields() {
   };
 
   // ================= OPEN EDIT =================
-  const openEditModal = (field) => {
+  const openEditModal = async (field) => {
     setEditingField(field);
 
     const image = field.images?.[0] || "";
@@ -129,6 +196,8 @@ function AdminFields() {
       price_per_hour: field.price_per_hour || "",
       images: field.images || [],
     });
+
+    await fetchPricing(field.id);
 
     setShowModal(true);
   };
@@ -204,86 +273,86 @@ function AdminFields() {
 
       {/* SIDEBAR */}
       {/* SIDEBAR */}
-<div className="sidebar">
+      <div className="sidebar">
 
-  <Link to="/" className="navbar-logo admin-logo">
-            <FaFutbol className="logo-icon" />
-          
-            <div className="logo-text">
-              <span className="logo-title">SânBóngPro</span>
-              <small className="logo-sub">Booking System</small>
-            </div>
+        <Link to="/" className="navbar-logo admin-logo">
+          <FaFutbol className="logo-icon" />
+
+          <div className="logo-text">
+            <span className="logo-title">SânBóngPro</span>
+            <small className="logo-sub">Booking System</small>
+          </div>
+        </Link>
+
+        <ul className="menu">
+
+          {/* DASHBOARD */}
+          <Link to="/admin">
+            <li>
+              <FaChartBar />
+              Dashboard
+            </li>
           </Link>
 
-  <ul className="menu">
+          {/* FIELDS */}
+          <Link to="/admin/AdminFields">
+            <li className="active">
+              <FaFutbol />
+              Quản lý sân bóng
+            </li>
+          </Link>
 
-    {/* DASHBOARD */}
-    <Link to="/admin">
-      <li>
-        <FaChartBar />
-        Dashboard
-      </li>
-    </Link>
+          {/* BOOKINGS */}
+          <Link to="/admin/AdminBookings">
+            <li>
+              <FaClipboardList />
+              Đơn đặt
+            </li>
+          </Link>
 
-    {/* FIELDS */}
-    <Link to="/admin/AdminFields">
-      <li className="active">
-        <FaFutbol />
-        Quản lý sân bóng
-      </li>
-    </Link>
+          {/* USERS */}
+          <Link to="/admin/AdminUsers">
+            <li>
+              <FaUsers />
+              Người dùng
+            </li>
+          </Link>
+          <Link to="/admin/AdminReviews">
+            <li>
+              <FaComments />
+              Đánh giá
+            </li>
+          </Link>
+          <Link to="/admin/AdminVouchers">
+            <li>
+              <FaTicketAlt />
+              Mã giảm giá
+            </li>
+          </Link>
+          <Link to="/admin/AdminNotifications">
+            <li>
+              <FaBell />
+              Thông báo
+            </li>
+          </Link>
+        </ul>
 
-    {/* BOOKINGS */}
-    <Link to="/admin/AdminBookings">
-      <li>
-        <FaClipboardList />
-        Đơn đặt
-      </li>
-    </Link>
-
-    {/* USERS */}
-    <Link to="/admin/AdminUsers">
-      <li>
-        <FaUsers />
-        Người dùng
-      </li>
-    </Link>
-    <Link to="/admin/AdminReviews">
-  <li>
-    <FaComments />
-    Đánh giá
-  </li>
-</Link>
-    <Link to="/admin/AdminVouchers">
-      <li>
-        <FaTicketAlt />
-        Mã giảm giá
-      </li>
-    </Link>
-    <Link to="/admin/AdminNotifications">
-      <li>
-        <FaBell />
-        Thông báo
-      </li>
-    </Link>
-  </ul>
-
-</div>
+      </div>
 
       {/* MAIN */}
 
       <div className="main-content">
         <div className="page-header">
-        
-                  <h1>Quản lý người dùng</h1>
-        
-                  <button className="add-btn" onClick={openAddModal}>
-          + Thêm sân bóng
-        </button>
-        
-                </div>
 
-        
+          <h1>Quản lý người dùng</h1>
+
+          <button className="add-btn" onClick={openAddModal}>
+            + Thêm sân bóng
+          </button>
+
+        </div>
+
+
 
         {/* TABLE */}
         <div className="table-container">
@@ -319,79 +388,141 @@ function AdminFields() {
         </div>
 
         {/* MODAL */}
-{showModal && (
-  <div className="modal-overlay">
-    <div className="modal">
+        {showModal && (
+          <div className="modal-overlay">
+            <div className="modal">
 
-      <div className="modal-header">
-        <h2>{editingField ? "Sửa sân" : "Thêm sân"}</h2>
+              <div className="modal-header">
+                <h2>{editingField ? "Sửa sân" : "Thêm sân"}</h2>
 
-        <FaTimes onClick={() => setShowModal(false)} />
-      </div>
+                <FaTimes onClick={() => setShowModal(false)} />
+              </div>
 
-      <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit}>
 
-        <input
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Tên sân"
-        />
+                <input
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Tên sân"
+                />
 
-        <input
-          name="address"
-          value={formData.address}
-          onChange={handleChange}
-          placeholder="Địa chỉ"
-        />
+                <input
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  placeholder="Địa chỉ"
+                />
 
-        {/* ✅ FIX: THÊM LOẠI SÂN */}
-        <select
-          name="type"
-          value={formData.type}
-          onChange={handleChange}
-        >
-          <option value="Sân 5">Sân 5</option>
-          <option value="Sân 7">Sân 7</option>
-          <option value="Sân 11">Sân 11</option>
-        </select>
+                {/* ✅ FIX: THÊM LOẠI SÂN */}
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                >
+                  <option value="Sân 5">Sân 5</option>
+                  <option value="Sân 7">Sân 7</option>
+                  <option value="Sân 11">Sân 11</option>
+                </select>
 
-        <input
-          name="price_per_hour"
-          value={formData.price_per_hour}
-          onChange={handleChange}
-          placeholder="Giá"
-          type="number"
-        />
+                <input
+                  name="price_per_hour"
+                  value={formData.price_per_hour}
+                  onChange={handleChange}
+                  placeholder="Giá"
+                  type="number"
+                />
 
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Mô tả"
-        />
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Mô tả"
+                />
+                <hr />
 
-        <input
-          value={formData.images?.[0] || ""}
-          onChange={handleImageUrl}
-          placeholder="Link ảnh"
-        />
+                <h3>Quản lý giờ vàng</h3>
 
-        <input type="file" onChange={handleImageUpload} />
+                <div className="pricing-section">
 
-        {previewImage && (
-          <img src={previewImage} width="120" alt="" />
+                  <input
+                    type="time"
+                    name="start_time"
+                    value={pricingForm.start_time}
+                    onChange={handlePricingChange}
+                  />
+
+                  <input
+                    type="time"
+                    name="end_time"
+                    value={pricingForm.end_time}
+                    onChange={handlePricingChange}
+                  />
+
+                  <input
+                    type="number"
+                    name="price_per_hour"
+                    placeholder="Giá theo giờ"
+                    value={pricingForm.price_per_hour}
+                    onChange={handlePricingChange}
+                  />
+
+                  <input
+                    type="text"
+                    name="label"
+                    placeholder="Giờ vàng / Cao điểm"
+                    value={pricingForm.label}
+                    onChange={handlePricingChange}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleAddPricing}
+                  >
+                    + Thêm khung giá
+                  </button>
+
+                </div>
+
+                <div className="pricing-list">
+                  {pricingList.map((item) => (
+                    <div
+                      key={item.id}
+                      className="pricing-item"
+                    >
+                      <strong>
+                        {item.start_time} - {item.end_time}
+                      </strong>
+
+                      <div>
+                        {Number(item.price_per_hour).toLocaleString()}đ
+                      </div>
+
+                      <small>{item.label}</small>
+                    </div>
+                  ))}
+                </div>
+                <input
+                  value={formData.images?.[0] || ""}
+                  onChange={handleImageUrl}
+                  placeholder="Link ảnh"
+                />
+
+                <input type="file" onChange={handleImageUpload} />
+
+                {previewImage && (
+                  <img src={previewImage} width="120" alt="" />
+                )}
+
+                <button type="submit">
+                  {editingField ? "Cập nhật" : "Thêm"}
+                </button>
+
+              </form>
+
+            </div>
+          </div>
         )}
-
-        <button type="submit">
-          {editingField ? "Cập nhật" : "Thêm"}
-        </button>
-
-      </form>
-
-    </div>
-  </div>
-)}
 
       </div>
     </div>

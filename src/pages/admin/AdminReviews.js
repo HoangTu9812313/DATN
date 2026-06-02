@@ -3,7 +3,7 @@ import React, {
   useState,
 } from "react";
 
-import "./AdminFields.css";
+import "./Style/AdminFields.css";
 
 import {
   FaFutbol,
@@ -59,7 +59,7 @@ function AdminReviews() {
           )
             ? fieldsRes.data
             : fieldsRes.data
-                ?.fields || [];
+              ?.fields || [];
 
         let allReviews = [];
 
@@ -80,7 +80,7 @@ function AdminReviews() {
               )
                 ? res.data
                 : res.data
-                    ?.reviews || [];
+                  ?.reviews || [];
 
             const mapped =
               fieldReviews.map(
@@ -200,13 +200,13 @@ function AdminReviews() {
       <div className="sidebar">
 
         <Link to="/" className="navbar-logo admin-logo">
-                  <FaFutbol className="logo-icon" />
-                
-                  <div className="logo-text">
-                    <span className="logo-title">SânBóngPro</span>
-                    <small className="logo-sub">Booking System</small>
-                  </div>
-                </Link>
+          <FaFutbol className="logo-icon" />
+
+          <div className="logo-text">
+            <span className="logo-title">SânBóngPro</span>
+            <small className="logo-sub">Booking System</small>
+          </div>
+        </Link>
 
         <ul className="menu">
 
@@ -383,10 +383,10 @@ function AdminReviews() {
                       <td>
                         {review.createdAt
                           ? new Date(
-                              review.createdAt
-                            ).toLocaleDateString(
-                              "vi-VN"
-                            )
+                            review.createdAt
+                          ).toLocaleDateString(
+                            "vi-VN"
+                          )
                           : "Không có"}
                       </td>
 

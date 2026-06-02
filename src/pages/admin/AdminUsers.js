@@ -3,7 +3,7 @@ import React, {
   useState,
 } from "react";
 
-import "./AdminUsers.css";
+import "./Style/AdminUsers.css";
 
 import {
   FaFutbol,
@@ -100,8 +100,8 @@ function AdminUsers() {
       )
         ? res.data
         : res.data?.users ||
-          res.data?.data ||
-          [];
+        res.data?.data ||
+        [];
 
       // SORT ID tăng dần
       const sortedUsers = data.sort(
@@ -228,11 +228,11 @@ function AdminUsers() {
       setUsers((prev) =>
         prev.map((u) =>
           Number(u.id) ===
-          Number(editingUser.id)
+            Number(editingUser.id)
             ? {
-                ...u,
-                ...updateData,
-              }
+              ...u,
+              ...updateData,
+            }
             : u
         )
       );
@@ -316,13 +316,13 @@ function AdminUsers() {
       <div className="sidebar">
 
         <Link to="/" className="navbar-logo admin-logo">
-                  <FaFutbol className="logo-icon" />
-                
-                  <div className="logo-text">
-                    <span className="logo-title">SânBóngPro</span>
-                    <small className="logo-sub">Booking System</small>
-                  </div>
-                </Link>
+          <FaFutbol className="logo-icon" />
+
+          <div className="logo-text">
+            <span className="logo-title">SânBóngPro</span>
+            <small className="logo-sub">Booking System</small>
+          </div>
+        </Link>
 
         <ul className="menu">
 
@@ -354,11 +354,11 @@ function AdminUsers() {
             </li>
           </Link>
           <Link to="/admin/AdminReviews">
-  <li>
-    <FaComments />
-    Đánh giá
-  </li>
-</Link>
+            <li>
+              <FaComments />
+              Đánh giá
+            </li>
+          </Link>
           <Link to="/admin/AdminVouchers">
             <li>
               <FaTicketAlt />

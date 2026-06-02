@@ -220,7 +220,8 @@
   border-bottom: 1px solid #f1f5f9;
   font-size: 15px;
   color: #374151;
-  vertical-align: middle;
+  vertical-align: top;
+
 }
 
 .history-table tbody tr {

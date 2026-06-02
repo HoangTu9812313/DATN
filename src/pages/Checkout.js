@@ -1,7 +1,7 @@
 // src/pages/Checkout.js
 
 import React, { useState } from "react";
-import "./Checkout.css";
+import "./style/Checkout.css";
 
 import {
   useLocation,
@@ -41,14 +41,14 @@ function Checkout() {
 
   const [name, setName] = useState(
     userInfo?.user?.name ||
-      userInfo?.name ||
-      ""
+    userInfo?.name ||
+    ""
   );
 
   const [phone, setPhone] = useState(
     userInfo?.user?.phone ||
-      userInfo?.phone ||
-      ""
+    userInfo?.phone ||
+    ""
   );
 
   const [note, setNote] =
@@ -80,13 +80,13 @@ function Checkout() {
 
   // ================= GET DATA =================
   const {
-  field,
-  selectedDate,
-  selectedTimes,
-  voucher,
-  discountAmount = 0,
-  finalTotal = 0,
-} = bookingData;
+    field,
+    selectedDate,
+    selectedTimes,
+    voucher,
+    discountAmount = 0,
+    finalTotal = 0,
+  } = bookingData;
 
   // ================= FORMAT DATE =================
   const formatDate = (date) => {
@@ -127,145 +127,137 @@ function Checkout() {
 
   // ================= TOTAL =================
   const subtotal =
-  sortedSlots.reduce(
-    (total, slot) =>
-      total +
-      Number(slot.price || 0),
-    0
-  );
+    sortedSlots.reduce(
+      (total, slot) =>
+        total +
+        Number(slot.price || 0),
+      0
+    );
 
-const totalPrice =
-  Number(finalTotal || subtotal);
+  const totalPrice =
+    Number(finalTotal || subtotal);
 
-const finalDiscount =
-  Number(discountAmount || 0);
+  const finalDiscount =
+    Number(discountAmount || 0);
 
   // ================= HANDLE BOOKING =================
   const handleConfirm = async () => {
-  try {
-    if (!userInfo) {
-      alert("Vui lòng đăng nhập");
-      return navigate("/login");
+    try {
+      if (!userInfo) {
+        alert("Vui lòng đăng nhập");
+        return navigate("/login");
+      }
+
+      if (!token) {
+        alert("Token không tồn tại");
+        return;
+      }
+
+      if (!field?.id || !formattedDate || sortedSlots.length === 0) {
+        alert("Thiếu dữ liệu đặt sân");
+        return;
+      }
+
+      setLoading(true);
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      // ================= CREATE BOOKING (NO HOLD HERE) =================
+      const payload = {
+        field_id: Number(field.id),
+
+        bookings: sortedSlots.map(
+          (slot) => ({
+            date: formattedDate,
+            slot: slot.start_time,
+          })
+        ),
+
+        duration: 60,
+
+        voucher_code:
+          voucher?.code || null,
+
+        name,
+        phone,
+
+        email:
+          userInfo?.user?.email ||
+          userInfo?.email ||
+          "",
+
+        payment_method:
+          paymentMethod,
+      };
+
+      console.log(
+        "BOOKING PAYLOAD",
+        payload
+      );
+
+      const bookingRes = await API.post(
+        "/bookings",
+        payload,
+        config
+      );
+      // ================= CASH =================
+      if (paymentMethod === "cash") {
+        alert("🎉 Đặt sân thành công!");
+        navigate("/");
+        return;
+      }
+
+      const bookingId =
+        bookingRes.data?.booking?.id ||
+        bookingRes.data?.bookings?.[0]?.id ||
+        bookingRes.data?.id;
+
+      if (!bookingId) {
+        alert("Không tìm thấy booking ID");
+        return;
+      }
+
+      // ================= PAYMENT =================
+      const paymentRes = await API.post(
+        "/bookings/payment/create",
+        {
+          bookingIds: [bookingId],
+          amount: Number(totalPrice),
+          platform: "web",
+        },
+        config
+      );
+
+      if (paymentRes.data?.checkoutUrl) {
+        window.location.href = paymentRes.data.checkoutUrl;
+        return;
+      }
+
+      alert("Không tạo được link thanh toán");
+    } catch (err) {
+      console.log(err);
+
+      const message = err.response?.data?.message || "";
+
+      if (message.includes("Slot already taken")) {
+        alert("❌ Một trong các khung giờ đã được đặt");
+        return;
+      }
+
+      if (message.includes("token") || message.includes("jwt")) {
+        alert("❌ Hết phiên đăng nhập");
+        return navigate("/login");
+      }
+
+      alert(message || "❌ Lỗi thanh toán");
+    } finally {
+      setLoading(false);
     }
-
-    if (!token) {
-      alert("Token không tồn tại");
-      return;
-    }
-
-    if (!field?.id || !formattedDate || sortedSlots.length === 0) {
-      alert("Thiếu dữ liệu đặt sân");
-      return;
-    }
-
-    setLoading(true);
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    // ================= CREATE BOOKING (NO HOLD HERE) =================
-    const bookingRes = await API.post(
-  "/bookings",
-  {
-    field_id: Number(field.id),
-
-    booking_date:
-      formattedDate,
-
-    slots:
-      sortedSlots.map(
-        (slot) =>
-          slot.start_time
-      ),
-
-    name,
-    phone,
-
-    email:
-      userInfo?.user?.email ||
-      userInfo?.email ||
-      "",
-
-    note,
-
-    payment_method:
-      paymentMethod,
-
-    // ================= VOUCHER =================
-
-    voucherCode:
-      voucher?.code || null,
-
-    discountAmount:
-      finalDiscount,
-
-    finalAmount:
-      totalPrice,
-  },
-  config
-);
-console.log(
-  "BOOKING RESPONSE",
-  bookingRes.data
-);
-
-    // ================= CASH =================
-    if (paymentMethod === "cash") {
-      alert("🎉 Đặt sân thành công!");
-      navigate("/");
-      return;
-    }
-
-    const bookingId =
-      bookingRes.data?.booking?.id ||
-      bookingRes.data?.bookings?.[0]?.id ||
-      bookingRes.data?.id;
-
-    if (!bookingId) {
-      alert("Không tìm thấy booking ID");
-      return;
-    }
-
-    // ================= PAYMENT =================
-    const paymentRes = await API.post(
-  "/payments/create",
-  {
-    bookingIds: [bookingId],
-    amount: Number(totalPrice),
-    platform: "web",
-  },
-  config
-);
-
-    if (paymentRes.data?.checkoutUrl) {
-      window.location.href = paymentRes.data.checkoutUrl;
-      return;
-    }
-
-    alert("Không tạo được link thanh toán");
-  } catch (err) {
-    console.log(err);
-
-    const message = err.response?.data?.message || "";
-
-    if (message.includes("Slot already taken")) {
-      alert("❌ Một trong các khung giờ đã được đặt");
-      return;
-    }
-
-    if (message.includes("token") || message.includes("jwt")) {
-      alert("❌ Hết phiên đăng nhập");
-      return navigate("/login");
-    }
-
-    alert(message || "❌ Lỗi thanh toán");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="checkout-page">
@@ -456,12 +448,11 @@ console.log(
 
               {/* CASH */}
               <div
-                className={`payment-box ${
-                  paymentMethod ===
-                  "cash"
+                className={`payment-box ${paymentMethod ===
+                    "cash"
                     ? "active-payment"
                     : ""
-                }`}
+                  }`}
                 onClick={() =>
                   setPaymentMethod(
                     "cash"
@@ -487,12 +478,11 @@ console.log(
 
               {/* BANKING */}
               <div
-                className={`payment-box ${
-                  paymentMethod ===
-                  "banking"
+                className={`payment-box ${paymentMethod ===
+                    "banking"
                     ? "active-payment"
                     : ""
-                }`}
+                  }`}
                 onClick={() =>
                   setPaymentMethod(
                     "banking"
@@ -614,34 +604,34 @@ console.log(
             {/* TOTAL */}
             {/* SUBTOTAL */}
 
-<div className="summary-row">
-  <span className="label">
-    Tạm tính
-  </span>
+            <div className="summary-row">
+              <span className="label">
+                Tạm tính
+              </span>
 
-  <span className="value">
-    {subtotal.toLocaleString()}đ
-  </span>
-</div>
+              <span className="value">
+                {subtotal.toLocaleString()}đ
+              </span>
+            </div>
 
-{/* DISCOUNT */}
+            {/* DISCOUNT */}
 
-{finalDiscount > 0 && (
-  <div className="summary-row">
-    <span className="label">
-      Giảm giá
-    </span>
+            {finalDiscount > 0 && (
+              <div className="summary-row">
+                <span className="label">
+                  Giảm giá
+                </span>
 
-    <span
-      className="value"
-      style={{
-        color: "#22c55e",
-      }}
-    >
-      -{finalDiscount.toLocaleString()}đ
-    </span>
-  </div>
-)}
+                <span
+                  className="value"
+                  style={{
+                    color: "#22c55e",
+                  }}
+                >
+                  -{finalDiscount.toLocaleString()}đ
+                </span>
+              </div>
+            )}
             <div className="summary-total">
 
               <span>
@@ -668,8 +658,8 @@ console.log(
                 ? "Đang xử lý..."
                 : paymentMethod ===
                   "banking"
-                ? "Thanh toán online"
-                : "Xác nhận đặt sân"}
+                  ? "Thanh toán online"
+                  : "Xác nhận đặt sân"}
 
             </button>
 

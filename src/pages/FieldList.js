@@ -1,7 +1,7 @@
 // src/pages/FieldList.js
 
 import React, { useEffect, useState } from "react";
-import "./FieldList.css";
+import "./style/FieldList.css";
 
 import { Link } from "react-router-dom";
 
@@ -42,25 +42,25 @@ function FieldList() {
   // ================= SEARCH =================
 
   const normalizeText = (text) =>
-  text
-    ?.toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, ""); // bỏ dấu tiếng Việt
+    text
+      ?.toString()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, ""); // bỏ dấu tiếng Việt
 
-const filtered = fields.filter((f) => {
-  const keyword = normalizeText(search);
+  const filtered = fields.filter((f) => {
+    const keyword = normalizeText(search);
 
-  const name = normalizeText(f.name);
-  const address = normalizeText(f.address);
-  const type = normalizeText(f.type);
+    const name = normalizeText(f.name);
+    const address = normalizeText(f.address);
+    const type = normalizeText(f.type);
 
-  return (
-    name?.includes(keyword) ||
-    address?.includes(keyword) ||
-    type?.includes(keyword)
-  );
-});
+    return (
+      name?.includes(keyword) ||
+      address?.includes(keyword) ||
+      type?.includes(keyword)
+    );
+  });
 
   return (
     <div className="all-fields">
@@ -92,7 +92,7 @@ const filtered = fields.filter((f) => {
       {/* ================= CONTENT ================= */}
 
       <div className="content-container">
-        
+
         {/* ================= LOADING ================= */}
 
         {loading ? (

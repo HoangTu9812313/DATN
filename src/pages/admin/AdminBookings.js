@@ -1,7 +1,7 @@
 // src/pages/admin/AdminBookings.js
 
 import React, { useEffect, useState } from "react";
-import "./AdminBookings.css";
+import "./Style/AdminBookings.css";
 
 import {
   FaFutbol,
@@ -40,7 +40,7 @@ function AdminBookings() {
   );
 
   const token = userInfo?.token;
-const [showBank, setShowBank] = useState(false);
+  const [showBank, setShowBank] = useState(false);
   const isAdmin =
     userInfo?.user?.role
       ?.toLowerCase()
@@ -100,40 +100,41 @@ const [showBank, setShowBank] = useState(false);
   // ================= GET BOOKING SLOTS =================
 
   const getBookingSlots = (booking) => {
-  if (Array.isArray(booking?.slots)) {
-    return booking.slots.map((s) => ({
-      date: s.date,
-      start: s.start || s.start_time,
-      end: s.end || s.end_time,
-      price: s.price || 0,
-    }));
-  }
+    if (Array.isArray(booking?.slots)) {
+      return booking.slots.map((s) => ({
+        date: s.date,
+        start: s.start,
+        end: s.end,
 
-  if (booking?.start_time && booking?.end_time) {
-    return [{
-      date: booking.booking_date,
-      start: booking.start_time,
-      end: booking.end_time,
-      price: booking.total_price || 0,
-    }];
-  }
+        // 🔥 FIX GIÁ CHUẨN
+        price: Number(s.price ?? 0),
+      }));
+    }
 
-  return [];
-};
+    if (booking?.start_time && booking?.end_time) {
+      return [
+        {
+          date: booking.booking_date,
+          start: booking.start_time,
+          end: booking.end_time,
 
+          // 🔥 FIX QUAN TRỌNG
+          price: Number(booking.total_price ?? 0),
+        },
+      ];
+    }
+
+    return [];
+  };
   // ================= CALCULATE TOTAL =================
 
   const calculateTotal = (booking) => {
-  if (booking?.total_price && Number(booking.total_price) > 0) {
-    return Number(booking.total_price);
-  }
+    const slots = getBookingSlots(booking);
 
-  const slots = getBookingSlots(booking);
-
-  return slots.reduce((sum, slot) => {
-    return sum + Number(slot.price || 0);
-  }, 0);
-};
+    return slots.reduce((sum, slot) => {
+      return sum + Number(slot.price || 0);
+    }, 0);
+  };
 
   // ================= TOTAL REVENUE =================
 
@@ -158,69 +159,66 @@ const [showBank, setShowBank] = useState(false);
   // ================= UPDATE STATUS =================
 
   const updateStatus = async (id, payment_status) => {
-  try {
-    setUpdatingId(id);
+    try {
+      setUpdatingId(id);
 
-    await API.put(
-      `/bookings/${id}`,
-      
-      { payment_status },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+      await API.put(
+        `/bookings/${id}`,
+        { payment_status },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    // 🔥 FIX QUAN TRỌNG: update local state trước khi fetch
-    setBookings((prev) =>
-      prev.map((b) =>
-        b.id === id ? { ...b, payment_status } : b
-      )
-    );
+      await fetchBookings();
 
-    alert("Cập nhật trạng thái thành công");
-  } catch (error) {
-    console.log(error);
-    alert(error?.response?.data?.message || "Cập nhật thất bại");
-  } finally {
-    setUpdatingId(null);
-  }
-};
+      alert("Cập nhật trạng thái thành công");
+    } catch (error) {
+      console.log(error);
+      alert(
+        error?.response?.data?.message ||
+        "Cập nhật thất bại"
+      );
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   // ================= DELETE / CANCEL =================
 
   const handleDelete = async (id) => {
-  const confirmDelete = window.confirm("Bạn muốn hủy booking này?");
+    const confirmDelete = window.confirm("Bạn muốn hủy booking này?");
 
-  if (!confirmDelete) return;
+    if (!confirmDelete) return;
 
-  try {
-    await API.put(
-      `/bookings/${id}/cancel`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    try {
+      await API.put(
+        `/bookings/${id}/cancel`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    await fetchBookings();
-    alert("Hủy booking thành công");
-  } catch (error) {
-    console.log(error);
-    alert("Hủy thất bại");
-  }
-};
+      await fetchBookings();
+      alert("Hủy booking thành công");
+    } catch (error) {
+      console.log(error);
+      alert("Hủy thất bại");
+    }
+  };
 
   // ================= OPEN DETAIL =================
 
   const openBookingDetail = (booking) => {
-  setSelectedBooking(booking);
-  setShowModal(true);
-  setShowBank(false); // FIX BUG
-};
+    setSelectedBooking(booking);
+    setShowModal(true);
+    setShowBank(false); // FIX BUG
+  };
 
   // ================= FILTER =================
 
@@ -241,16 +239,16 @@ const [showBank, setShowBank] = useState(false);
     bookings.filter(
       (b) =>
         b.payment_status ===
-          "cancelled" ||
+        "cancelled" ||
         b.status === "cancelled"
     );
-    const refundPendingBookings = bookings.filter(
-  (b) => b.payment_status === "refund_pending"
-);
+  const refundPendingBookings = bookings.filter(
+    (b) => b.payment_status === "refund_pending"
+  );
 
-const refundedBookings = bookings.filter(
-  (b) => b.payment_status === "refunded"
-);
+  const refundedBookings = bookings.filter(
+    (b) => b.payment_status === "refunded"
+  );
 
   // ================= NO ACCESS =================
 
@@ -271,13 +269,13 @@ const refundedBookings = bookings.filter(
 
       <div className="sidebar">
         <Link to="/" className="navbar-logo admin-logo">
-                  <FaFutbol className="logo-icon" />
-                
-                  <div className="logo-text">
-                    <span className="logo-title">SânBóngPro</span>
-                    <small className="logo-sub">Booking System</small>
-                  </div>
-                </Link>
+          <FaFutbol className="logo-icon" />
+
+          <div className="logo-text">
+            <span className="logo-title">SânBóngPro</span>
+            <small className="logo-sub">Booking System</small>
+          </div>
+        </Link>
 
         <ul className="menu">
           <Link to="/admin">
@@ -416,7 +414,7 @@ const refundedBookings = bookings.filter(
                       className={
                         b.status ===
                           "cancelled" ||
-                        b.payment_status ===
+                          b.payment_status ===
                           "cancelled"
                           ? "cancelled-row"
                           : ""
@@ -441,24 +439,13 @@ const refundedBookings = bookings.filter(
 
                       <td>
                         <div className="slot-list-admin">
-                          {slots.map(
-                            (
-                              slot,
-                              index
-                            ) => (
-                              <div
-                                key={
-                                  index
-                                }
-                              >
-                                {formatTime(slot.start || slot.start_time)}
-                                {" - "}
-                                {formatTime(
-                                  slot.end || slot.end_time
-                                )}
-                              </div>
-                            )
-                          )}
+                          {slots.map((slot, index) => (
+                            <div key={index}>
+                              {formatTime(slot.start)} - {formatTime(slot.end)}
+                              {" | "}
+                              {Number(slot.price ?? 0).toLocaleString("vi-VN")}đ
+                            </div>
+                          ))}
                         </div>
                       </td>
 
@@ -480,17 +467,17 @@ const refundedBookings = bookings.filter(
 
                       <td>
                         <select
-  value={b.payment_status || "pending"}
-  disabled={updatingId === b.id}
-  onChange={(e) => updateStatus(b.id, e.target.value)}
-  className={`status-select ${b.payment_status || "pending"}`}
->
-  <option value="pending">Chưa thanh toán</option>
-  <option value="paid">Đã thanh toán</option>
-  <option value="cancelled">Đã hủy</option>
-  <option value="refund_pending">Chờ hoàn tiền</option>
-  <option value="refunded">Đã hoàn tiền</option>
-</select>
+                          value={b.payment_status || "pending"}
+                          disabled={updatingId === b.id}
+                          onChange={(e) => updateStatus(b.id, e.target.value)}
+                          className={`status-select ${b.payment_status || "pending"}`}
+                        >
+                          <option value="pending">Chưa thanh toán</option>
+                          <option value="paid">Đã thanh toán</option>
+                          <option value="cancelled">Đã hủy</option>
+                          <option value="refund_pending">Chờ hoàn tiền</option>
+                          <option value="refunded">Đã hoàn tiền</option>
+                        </select>
                       </td>
 
                       {/* ACTION */}
@@ -504,7 +491,7 @@ const refundedBookings = bookings.filter(
                                 b
                               )
                             }
-                          />                         
+                          />
                         </div>
                       </td>
                     </tr>
@@ -630,23 +617,23 @@ const refundedBookings = bookings.filter(
                   </span>
 
                   <div className="all-slot-detail">
-                      {getBookingSlots(selectedBooking).map((slot, index) => (
-  <div key={index} className="slot-detail-item">
-    <FaClock />
+                    {getBookingSlots(selectedBooking).map((slot, index) => (
+                      <div key={index} className="slot-detail-item">
+                        <FaClock />
 
-    <span>
-      {formatTime(slot.start || slot.start_time)}
-      {" - "}
-      {formatTime(slot.end || slot.end_time)}
-    </span>
+                        <span>
+                          {formatTime(slot.start || slot.start_time)}
+                          {" - "}
+                          {formatTime(slot.end || slot.end_time)}
+                        </span>
 
-    <strong>
-      {Number(slot.price || 0).toLocaleString("vi-VN")}đ
-    </strong>
-  </div>
-))}
-                      )
-                    
+                        <strong>
+                          {Number(slot.price ?? 0).toLocaleString("vi-VN")}đ
+                        </strong>
+                      </div>
+                    ))}
+
+
                   </div>
                 </div>
 
@@ -668,18 +655,17 @@ const refundedBookings = bookings.filter(
                   </span>
 
                   <strong
-                  className={`status-text ${
-                    selectedBooking.payment_status || "pending"
-                  }`}
-                >
-                  {selectedBooking.payment_status === "refund_pending"
-                    ? "Chờ hoàn tiền"
-                    : selectedBooking.payment_status === "refunded"
-                    ? "Đã hoàn tiền"
-                    : selectedBooking.payment_status === "paid"
-                    ? "Đã thanh toán"
-                    : selectedBooking.payment_status || "pending"}
-                </strong>
+                    className={`status-text ${selectedBooking.payment_status || "pending"
+                      }`}
+                  >
+                    {selectedBooking.payment_status === "refund_pending"
+                      ? "Chờ hoàn tiền"
+                      : selectedBooking.payment_status === "refunded"
+                        ? "Đã hoàn tiền"
+                        : selectedBooking.payment_status === "paid"
+                          ? "Đã thanh toán"
+                          : selectedBooking.payment_status || "pending"}
+                  </strong>
                 </div>
 
                 <div className="detail-item">
@@ -697,15 +683,15 @@ const refundedBookings = bookings.filter(
                   </strong>
                 </div>
                 {(selectedBooking.payment_status === "refund_pending" ||
-  selectedBooking.payment_status === "refunded") && (
-  <button
-    className="bank-btn"
-    onClick={() => setShowBank(true)}
-  >
-    Xem thông tin hoàn tiền
-  </button>
-)}
-                                {showBank && (
+                  selectedBooking.payment_status === "refunded") && (
+                    <button
+                      className="bank-btn"
+                      onClick={() => setShowBank(true)}
+                    >
+                      Xem thông tin hoàn tiền
+                    </button>
+                  )}
+                {showBank && (
                   <div className="modal-overlay">
                     <div className="bank-modal">
                       <div className="modal-header">

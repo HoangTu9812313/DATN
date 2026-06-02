@@ -3,7 +3,7 @@ import React, {
   useState,
 } from "react";
 
-import "./Home.css";
+import "./style/Home.css";
 
 import { Link } from "react-router-dom";
 
@@ -117,42 +117,42 @@ function Home() {
         // SORT MỚI NHẤT
 
         // Ưu tiên rating cao nhất
-// nếu bằng sao thì lấy mới nhất
+        // nếu bằng sao thì lấy mới nhất
 
-allReviews.sort(
-  (a, b) => {
+        allReviews.sort(
+          (a, b) => {
 
-    // SORT STAR DESC
-    if (
-      b.rating !==
-      a.rating
-    ) {
-      return (
-        b.rating -
-        a.rating
-      );
-    }
+            // SORT STAR DESC
+            if (
+              b.rating !==
+              a.rating
+            ) {
+              return (
+                b.rating -
+                a.rating
+              );
+            }
 
-    // SORT NEWEST
-    return (
-      new Date(
-        b.createdAt
-      ) -
-      new Date(
-        a.createdAt
-      )
-    );
-  }
-);
+            // SORT NEWEST
+            return (
+              new Date(
+                b.createdAt
+              ) -
+              new Date(
+                a.createdAt
+              )
+            );
+          }
+        );
 
-// CHỈ LẤY 3 REVIEW TỐT NHẤT
+        // CHỈ LẤY 3 REVIEW TỐT NHẤT
 
-setReviews(
-  allReviews.slice(
-    0,
-    3
-  )
-);
+        setReviews(
+          allReviews.slice(
+            0,
+            3
+          )
+        );
       } catch (err) {
         console.log(err);
       }
@@ -353,7 +353,7 @@ setReviews(
 
         <div className="review-grid">
           {reviews.length >
-          0 ? (
+            0 ? (
             reviews.map(
               (
                 review
@@ -408,7 +408,7 @@ setReviews(
                   <span className="review-rating">
                     {"⭐".repeat(
                       review.rating ||
-                        5
+                      5
                     )}
                   </span>
                 </div>

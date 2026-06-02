@@ -781,3 +781,32 @@
   font-size: 12px;
   font-weight: 700;
 }
+.field-description {
+  margin-top: 20px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.field-description strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.field-description strong::before {
+  content: "📋";
+}
+
+.field-description p {
+  margin: 0;
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.8;
+  text-align: justify;
+}
