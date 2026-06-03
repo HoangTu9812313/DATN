@@ -338,3 +338,18 @@ td svg:last-child {
 .pricing-item small {
   color: #666;
 }
+.table-container img {
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.pricing-list {
+  margin-top: 10px;
+}
+
+.pricing-item {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}

@@ -32,13 +32,16 @@ function AdminFields() {
     label: "",
   });
   const [formData, setFormData] = useState({
-    name: "",
-    address: "",
-    type: "Sân 5",
-    description: "",
-    price_per_hour: "",
-    images: [],
-  });
+  name: "",
+  address: "",
+  type: "Sân 5",
+  description: "",
+  price_per_hour: "",
+  open_time: "05:00",
+  close_time: "23:00",
+  slot_duration: 30,
+  image: "",
+});
 
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
@@ -61,17 +64,7 @@ function AdminFields() {
   useEffect(() => {
     fetchFields();
   }, []);
-  // ================= FETCH PRICING =================
-  const fetchPricing = async (fieldId) => {
-    try {
-      const res = await API.get(`/field-pricing/${fieldId}`);
-
-      setPricingList(res.data?.pricing || []);
-    } catch (err) {
-      console.log(err);
-      setPricingList([]);
-    }
-  };
+ 
 
   // ================= CHANGE PRICING =================
   const handlePricingChange = (e) => {
@@ -107,7 +100,19 @@ function AdminFields() {
         }
       );
 
-      await fetchPricing(editingField.id);
+      const updatedFields = await API.get("/fields");
+
+const updatedField = (
+  Array.isArray(updatedFields.data)
+    ? updatedFields.data
+    : updatedFields.data.fields
+).find(
+  (f) => f.id === editingField.id
+);
+
+setPricingList(
+  updatedField?.pricingRules || []
+);
 
       setPricingForm({
         start_time: "",
@@ -143,9 +148,9 @@ function AdminFields() {
       setPreviewImage(base64);
 
       setFormData((prev) => ({
-        ...prev,
-        images: [base64],
-      }));
+  ...prev,
+  image: base64,
+}));
     };
 
     reader.readAsDataURL(file);
@@ -158,9 +163,9 @@ function AdminFields() {
     setPreviewImage(value);
 
     setFormData((prev) => ({
-      ...prev,
-      images: value ? [value] : [],
-    }));
+  ...prev,
+  image: value,
+}));
   };
 
   // ================= OPEN ADD =================
@@ -169,13 +174,18 @@ function AdminFields() {
     setPreviewImage("");
 
     setFormData({
-      name: "",
-      address: "",
-      type: "Sân 5",
-      description: "",
-      price_per_hour: "",
-      images: [],
-    });
+  name: "",
+  address: "",
+  type: "Sân 5",
+  description: "",
+  price_per_hour: "",
+  open_time: "05:00",
+  close_time: "23:00",
+  slot_duration: 30,
+  image: "",
+});
+
+setPricingList([]);
 
     setShowModal(true);
   };
@@ -184,20 +194,21 @@ function AdminFields() {
   const openEditModal = async (field) => {
     setEditingField(field);
 
-    const image = field.images?.[0] || "";
+    setPreviewImage(field.image || "");
 
-    setPreviewImage(image);
+setFormData({
+  name: field.name || "",
+  address: field.address || "",
+  type: field.type || "Sân 5",
+  description: field.description || "",
+  price_per_hour: field.price_per_hour || "",
+  open_time: field.open_time || "05:00",
+  close_time: field.close_time || "23:00",
+  slot_duration: field.slot_duration || 30,
+  image: field.image || "",
+});
 
-    setFormData({
-      name: field.name || "",
-      address: field.address || "",
-      type: field.type || "Sân 5",
-      description: field.description || "",
-      price_per_hour: field.price_per_hour || "",
-      images: field.images || [],
-    });
-
-    await fetchPricing(field.id);
+setPricingList(field.pricingRules || []);
 
     setShowModal(true);
   };
@@ -216,13 +227,24 @@ function AdminFields() {
       };
 
       const payload = {
-        name: formData.name,
-        address: formData.address,
-        type: formData.type,
-        description: formData.description,
-        price_per_hour: Number(formData.price_per_hour),
-        images: formData.images,
-      };
+  name: formData.name,
+  address: formData.address,
+  description: formData.description,
+  type: formData.type,
+
+  image: formData.image,
+
+  open_time: formData.open_time,
+  close_time: formData.close_time,
+
+  slot_duration: Number(
+    formData.slot_duration
+  ),
+
+  price_per_hour: Number(
+    formData.price_per_hour
+  ),
+};
 
       if (editingField) {
         await API.put(
@@ -237,6 +259,7 @@ function AdminFields() {
 
         alert("Thêm sân thành công");
       }
+      setPricingList([]);
 
       setShowModal(false);
       fetchFields();
@@ -344,7 +367,7 @@ function AdminFields() {
       <div className="main-content">
         <div className="page-header">
 
-          <h1>Quản lý người dùng</h1>
+          <h1>Quản lý sân bóng</h1>
 
           <button className="add-btn" onClick={openAddModal}>
             + Thêm sân bóng
@@ -359,29 +382,63 @@ function AdminFields() {
           <table>
             <thead>
               <tr>
-                <th>Tên sân</th>
-                <th>Địa chỉ</th>
-                <th>Loại</th>
-                <th>Giá</th>
-                <th>Mô tả</th>
-                <th>Hành động</th>
-              </tr>
+  <th>Tên sân</th>
+  <th>Địa chỉ</th>
+  <th>Loại</th>
+  <th>Giá cơ bản</th>
+  <th>Giờ hoạt động</th>
+  <th>Slot</th>
+  <th>Ảnh</th>
+  <th>Hành động</th>
+</tr>
             </thead>
 
             <tbody>
               {fields.map((field) => (
                 <tr key={field.id}>
-                  <td>{field.name}</td>
-                  <td>{field.address}</td>
-                  <td>{field.type}</td>
-                  <td>{field.price_per_hour}</td>
-                  <td>{field.description}</td>
+  <td>{field.name}</td>
 
-                  <td>
-                    <FaEdit onClick={() => openEditModal(field)} />
-                    <FaTrash onClick={() => handleDelete(field.id)} />
-                  </td>
-                </tr>
+  <td>{field.address}</td>
+
+  <td>{field.type}</td>
+
+  <td>
+    {Number(field.price_per_hour).toLocaleString()}đ
+  </td>
+
+  <td>
+    {field.open_time} - {field.close_time}
+  </td>
+
+  <td>
+    {field.slot_duration} phút
+  </td>
+
+  <td>
+    <img
+      src={field.image}
+      alt={field.name}
+      width="80"
+      height="60"
+      style={{
+        objectFit: "cover",
+        borderRadius: "8px",
+      }}
+    />
+  </td>
+
+  <td>
+    <FaEdit
+      style={{ cursor: "pointer", marginRight: 10 }}
+      onClick={() => openEditModal(field)}
+    />
+
+    <FaTrash
+      style={{ cursor: "pointer" }}
+      onClick={() => handleDelete(field.id)}
+    />
+  </td>
+</tr>
               ))}
             </tbody>
           </table>
@@ -432,7 +489,27 @@ function AdminFields() {
                   placeholder="Giá"
                   type="number"
                 />
+                <input
+  type="time"
+  name="open_time"
+  value={formData.open_time}
+  onChange={handleChange}
+/>
 
+<input
+  type="time"
+  name="close_time"
+  value={formData.close_time}
+  onChange={handleChange}
+/>
+
+<input
+  type="number"
+  name="slot_duration"
+  value={formData.slot_duration}
+  onChange={handleChange}
+  placeholder="Thời lượng slot (phút)"
+/>
                 <textarea
                   name="description"
                   value={formData.description}
@@ -440,8 +517,6 @@ function AdminFields() {
                   placeholder="Mô tả"
                 />
                 <hr />
-
-                <h3>Quản lý giờ vàng</h3>
 
                 <div className="pricing-section">
 
@@ -466,15 +541,13 @@ function AdminFields() {
                     value={pricingForm.price_per_hour}
                     onChange={handlePricingChange}
                   />
-
                   <input
-                    type="text"
-                    name="label"
-                    placeholder="Giờ vàng / Cao điểm"
-                    value={pricingForm.label}
-                    onChange={handlePricingChange}
-                  />
-
+  type="text"
+  name="label"
+  placeholder="normal / peak / night"
+  value={pricingForm.label}
+  onChange={handlePricingChange}
+/>
                   <button
                     type="button"
                     onClick={handleAddPricing}
@@ -485,7 +558,7 @@ function AdminFields() {
                 </div>
 
                 <div className="pricing-list">
-                  {pricingList.map((item) => (
+  {pricingList?.map((item) => (
                     <div
                       key={item.id}
                       className="pricing-item"
@@ -495,18 +568,19 @@ function AdminFields() {
                       </strong>
 
                       <div>
-                        {Number(item.price_per_hour).toLocaleString()}đ
-                      </div>
+  {Number(item.price_per_hour).toLocaleString()}đ / giờ
+</div>
 
                       <small>{item.label}</small>
                     </div>
                   ))}
                 </div>
                 <input
-                  value={formData.images?.[0] || ""}
-                  onChange={handleImageUrl}
-                  placeholder="Link ảnh"
-                />
+  type="text"
+  value={formData.image || ""}
+  onChange={handleImageUrl}
+  placeholder="https://..."
+/>
 
                 <input type="file" onChange={handleImageUpload} />
 

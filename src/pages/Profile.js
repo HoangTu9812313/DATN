@@ -47,7 +47,7 @@ function Profile() {
     loadingBookings,
     setLoadingBookings,
   ] = useState(true);
-
+  const [showInvoice, setShowInvoice] = useState(false);
 
   const [showBankForm, setShowBankForm] = useState(false);
   const [cancelMode, setCancelMode] = useState(null);
@@ -152,23 +152,55 @@ function Profile() {
         item.id;
 
       if (!map[key]) {
-        map[key] = {
-          ...item,
-          slots: [],
-        };
-      }
+  map[key] = {
+    ...item,
+    slots: [],
+    total_price: 0,
+    final_amount: 0,
+    deposit_amount: 0,
+    remaining_amount: 0,
+  };
+}
 
       map[key].slots.push({
         id: item.id,
         start_time: item.start_time,
         end_time: item.end_time,
         price:
-          item.final_amount ||
-          item.total_price ||
-          0,
+  item.price ||
+  item.slot_price ||
+  item.total_price ||
+  0,
         status: item.status,
         payment_status: item.payment_status,
       });
+
+      if (
+        item.payment_status === "refund_pending"
+      ) {
+        map[key].payment_status = "refund_pending";
+      }
+
+      if (
+        item.payment_status === "refunded"
+      ) {
+        map[key].payment_status = "refunded";
+      }
+      map[key].total_price += Number(
+  item.total_price || item.price || 0
+);
+
+map[key].final_amount += Number(
+  item.final_amount || 0
+);
+
+map[key].deposit_amount += Number(
+  item.deposit_amount || 0
+);
+
+map[key].remaining_amount += Number(
+  item.remaining_amount || 0
+);
     });
     Object.values(map).forEach((booking) => {
       const allCancelled = booking.slots.every(
@@ -185,6 +217,33 @@ function Profile() {
         new Date(a.createdAt)
     );
   };
+
+
+  const getPaymentStatusText = (booking) => {
+  switch (booking.payment_status) {
+
+    case "pending":
+      return "Chờ thanh toán";
+
+    case "deposit_paid":
+      return "Đã cọc 30%";
+
+    case "paid":
+      return "Đã thanh toán";
+
+    case "refund_pending":
+      return "Chờ hoàn tiền";
+
+    case "refunded":
+      return "Đã hoàn tiền";
+
+    case "refund_rejected":
+      return "Từ chối hoàn tiền";
+
+    default:
+      return booking.status;
+  }
+};
   // =========================
   // HANDLE INPUT
   // =========================
@@ -287,7 +346,19 @@ function Profile() {
         setSelectedBooking(null);
         return;
       }
+      const total =
+        selectedBooking.slots?.reduce(
+          (sum, slot) => sum + Number(slot.price || 0),
+          0
+        ) || 0;
 
+      const isDeposit = selectedBooking.payment_method === "deposit";
+
+      const paid = isDeposit
+        ? selectedBooking.deposit_amount || total * 0.3
+        : selectedBooking.final_amount || total;
+
+      const remaining = isDeposit ? total - paid : 0;
       // BANK → mở form nhập bank
       setSelectedBooking(booking);
       setShowBankForm(true);
@@ -305,21 +376,19 @@ function Profile() {
       const bookingId = selectedBooking?.id || selectedBooking?._id;
 
       const res = await API.put(
-        `/bookings/${bookingId}/cancel`,
-        {
-          cancel_type: "bank",
-          bank_info: {
-            bank_name: bankInfo.bank_name,
-            bank_number: bankInfo.bank_number,
-            bank_owner: bankInfo.bank_owner,
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  `/bookings/${bookingId}/cancel`,
+  {
+    bank_name: bankInfo.bank_name,
+    bank_number: bankInfo.bank_number,
+    bank_owner: bankInfo.bank_owner,
+    reason: "",
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
       alert(res.data?.message || "Hủy & hoàn tiền thành công");
 
@@ -596,9 +665,7 @@ function Profile() {
                         Khung giờ
                       </th>
 
-                      <th>
-                        Tổng tiền
-                      </th>
+                      <th>Đã thanh toán</th>
 
                       <th>
                         Trạng thái
@@ -661,28 +728,18 @@ function Profile() {
 
                           {/* PRICE */}
                           <td className="price">
-                            {totalPrice.toLocaleString()}đ
-                          </td>
+  {booking.payment_method === "deposit"
+    ? booking.deposit_amount.toLocaleString()
+    : booking.final_amount.toLocaleString()
+  }đ
+</td>
 
                           {/* STATUS */}
                           <td>
                             <span
-                              className={`status-badge ${booking.status === "cancelled"
-                                ? "cancelled"
-                                : booking.payment_status === "refund_pending"
-                                  ? "pending"
-                                  : booking.payment_status === "refunded"
-                                    ? "paid"
-                                    : booking.payment_method === "cash"
-                                      ? "pending"
-                                      : "paid"
-                                }`}
+                              className={`status-badge ${booking.payment_status || "pending"}`}
                             >
-                              {booking.status === "cancelled"
-                                ? "Đã hủy"
-                                : booking.payment_method === "cash"
-                                  ? "Chờ thanh toán"
-                                  : "Đã thanh toán"}
+                              {getPaymentStatusText(booking)}
                             </span>
                           </td>
 
@@ -754,13 +811,7 @@ function Profile() {
                     : "paid"
                   }`}
               >
-                {selectedBooking.status ===
-                  "cancelled"
-                  ? "Đã hủy"
-                  : selectedBooking.payment_method ===
-                    "cash"
-                    ? "Chờ thanh toán"
-                    : "Đã thanh toán"}
+                {getPaymentStatusText(selectedBooking)}
               </span>
             </div>
 
@@ -874,16 +925,7 @@ function Profile() {
 
               {/* PAYMENT */}
 
-              <div className="detail-item">
-                <span>Thanh toán</span>
-
-                <strong>
-                  {selectedBooking.payment_method ===
-                    "cash"
-                    ? "Tiền mặt"
-                    : "Chuyển khoản"}
-                </strong>
-              </div>
+              
 
               {/* TRANSACTION */}
 
@@ -897,6 +939,7 @@ function Profile() {
                     }
                   </strong>
                 </div>
+
               )}
             </div>
             {showBankForm && cancelMode === "bank" && selectedBooking && (
@@ -935,6 +978,69 @@ function Profile() {
                 </button>
               </div>
             )}
+            <button
+  className="invoice-btn"
+  onClick={() => setShowInvoice(!showInvoice)}
+>
+  {showInvoice ? "Ẩn hoá đơn" : "Xem hoá đơn"}
+</button>
+
+{showInvoice && (
+  <div className="invoice-box">
+    <h3>📄 Hoá đơn thanh toán</h3>
+
+    <div className="invoice-row">
+      <span>Sân:</span>
+      <b>{selectedBooking.field?.name}</b>
+    </div>
+
+    <div className="invoice-row">
+      <span>Ngày:</span>
+      <b>
+        {new Date(selectedBooking.booking_date).toLocaleDateString("vi-VN")}
+      </b>
+    </div>
+
+    <div className="invoice-row">
+      <span>Loại thanh toán:</span>
+      <b>
+        {selectedBooking.payment_method === "deposit"
+          ? "Cọc 30%"
+          : "Thanh toán full"}
+      </b>
+    </div>
+
+    <div className="invoice-row">
+      <span>Tổng tiền:</span>
+      <b>
+        {selectedBooking.slots
+          ?.reduce((sum, slot) => sum + Number(slot.price || 0), 0)
+          .toLocaleString()}đ
+      </b>
+    </div>
+
+   <div className="invoice-row">
+  <span>Đã thanh toán:</span>
+  <b>
+    {selectedBooking.deposit_amount.toLocaleString()}đ
+  </b>
+</div>
+
+<div className="invoice-row">
+  <span>Còn lại:</span>
+  <b>
+    {selectedBooking.remaining_amount.toLocaleString()}đ
+  </b>
+</div>
+
+    <div className="invoice-row total">
+      <span>Trạng thái:</span>
+      <b>
+        {getPaymentStatusText(selectedBooking)}
+      </b>
+    </div>
+  </div>
+)}
             {/* CLOSE */}
             {selectedBooking &&
               selectedBooking.status !== "cancelled" &&
@@ -954,6 +1060,7 @@ function Profile() {
               onClick={() => {
                 setSelectedBooking(null);
                 setShowBankForm(false);
+                setShowInvoice(false);
                 setCancelMode(null);
                 setBankInfo({
                   bank_name: "",

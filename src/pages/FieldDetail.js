@@ -140,6 +140,40 @@ function FieldDetail() {
       (duration / 60)
     );
   };
+
+const getRuleForTime = (startTime) => {
+  return pricingRules.find(
+    (p) =>
+      startTime >= p.start_time &&
+      startTime < p.end_time
+  );
+};
+  const isPastTime = (slot) => {
+  const now = new Date();
+
+  const selected = new Date(selectedDate);
+
+  // Chỉ kiểm tra khi là ngày hôm nay
+  const isToday =
+    selected.getFullYear() === now.getFullYear() &&
+    selected.getMonth() === now.getMonth() &&
+    selected.getDate() === now.getDate();
+
+  if (!isToday) return false;
+
+  const [hour, minute] = slot.start_time
+    .split(":")
+    .map(Number);
+
+  const slotDate = new Date(selected);
+
+  slotDate.setHours(hour);
+  slotDate.setMinutes(minute);
+  slotDate.setSeconds(0);
+  slotDate.setMilliseconds(0);
+
+  return slotDate < now;
+};
   // ================= GENERATE SLOT =================
 
   const generateSlots = (
@@ -201,16 +235,17 @@ function FieldDetail() {
       const endTime =
         `${String(eh).padStart(2, "0")}:${String(em).padStart(2, "0")}`;
 
-      result.push({
-        start_time: startTime,
+      const rule = getRuleForTime(startTime);
 
-        end_time: endTime,
-
-        price: getPriceForTime(
-          startTime,
-          slotDuration
-        ),
-      });
+result.push({
+  start_time: startTime,
+  end_time: endTime,
+  price: getPriceForTime(
+    startTime,
+    slotDuration
+  ),
+  label: rule?.label || "default",
+});
     }
 
     return result;
@@ -667,6 +702,11 @@ function FieldDetail() {
 
   const handleSelectTime =
     async (slot) => {
+      if (isPastTime(slot)) {
+  return alert(
+    "Khung giờ này đã qua, không thể đặt"
+  );
+}
       const user =
         JSON.parse(
           localStorage.getItem(
@@ -1208,56 +1248,42 @@ function FieldDetail() {
                     <div
                       key={i}
                       className={`time-slot
-                      ${isBooked(
-                        slot
-                      )
-                          ? "booked-slot"
-                          : ""
-                        }
-
-                      ${isHolding(
-                          slot
-                        ) &&
-                          !selected
-                          ? "holding-slot"
-                          : ""
-                        }
-
-                      ${selected
-                          ? "selected"
-                          : ""
-                        }`}
+  ${isPastTime(slot) ? "past-slot" : ""}
+  ${isBooked(slot) ? "booked-slot" : ""}
+  ${isHolding(slot) && !selected ? "holding-slot" : ""}
+  ${selected ? "selected" : ""}
+`}
                       onClick={() => {
-                        if (
-                          isBooked(
-                            slot
-                          )
-                        )
-                          return;
+  if (isPastTime(slot))
+    return;
 
-                        if (
-                          isHolding(
-                            slot
-                          ) &&
-                          !selected
-                        )
-                          return;
+  if (isBooked(slot))
+    return;
 
-                        handleSelectTime(
-                          slot
-                        );
-                      }}
+  if (
+    isHolding(slot) &&
+    !selected
+  )
+    return;
+
+  handleSelectTime(slot);
+}}
                     >
                       <div>
-                        <FaClock />{" "}
-                        {
-                          slot.start_time
-                        }{" "}
-                        -{" "}
-                        {
-                          slot.end_time
-                        }
-                      </div>
+  <FaClock /> {slot.start_time} - {slot.end_time}
+
+  {isPastTime(slot) && (
+    <span
+      style={{
+        marginLeft: 8,
+        color: "red",
+        fontWeight: "bold"
+      }}
+    >
+      ⛔ Đã qua
+    </span>
+  )}
+</div>
 
                       <div>
                         {Number(
@@ -1265,19 +1291,23 @@ function FieldDetail() {
                         ).toLocaleString()}
                         đ
 
-                        {pricingRules.some(
-                          (p) =>
-                            slot.start_time >=
-                            p.start_time &&
-                            slot.start_time <
-                            p.end_time
-                        ) && (
-                            <span
-                              className="golden-badge"
-                            >
-                              🔥 Giờ vàng
-                            </span>
-                          )}
+                        {slot.label === "peak" && (
+  <span className="golden-badge peak">
+    🔥 Giờ cao điểm
+  </span>
+)}
+
+{slot.label === "night" && (
+  <span className="golden-badge night">
+    🌙 Ca đêm
+  </span>
+)}
+
+{slot.label === "normal" && (
+  <span className="golden-badge normal">
+    ⚽ Thường
+  </span>
+)}
                       </div>
                     </div>
                   );
@@ -1307,24 +1337,22 @@ function FieldDetail() {
                         : ""
                       }`}
                     onClick={() => {
-                      if (
-                        !day
-                      )
-                        return;
+  if (!day) return;
 
-                      const newDate =
-                        new Date(
-                          selectedDate
-                        );
+  const newDate = new Date(selectedDate);
+  newDate.setDate(day);
 
-                      newDate.setDate(
-                        day
-                      );
+  const today = new Date();
 
-                      setSelectedDate(
-                        newDate
-                      );
-                    }}
+  today.setHours(0, 0, 0, 0);
+  newDate.setHours(0, 0, 0, 0);
+
+  if (newDate < today) {
+    return;
+  }
+
+  setSelectedDate(newDate);
+}}
                   >
                     {day}
                   </div>

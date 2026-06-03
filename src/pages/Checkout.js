@@ -24,7 +24,7 @@ function Checkout() {
   const navigate = useNavigate();
 
   const [paymentMethod, setPaymentMethod] =
-    useState("cash");
+  useState("deposit");
 
   const [loading, setLoading] =
     useState(false);
@@ -205,32 +205,34 @@ function Checkout() {
         config
       );
       // ================= CASH =================
-      if (paymentMethod === "cash") {
-        alert("🎉 Đặt sân thành công!");
-        navigate("/");
-        return;
-      }
+      
 
-      const bookingId =
-        bookingRes.data?.booking?.id ||
-        bookingRes.data?.bookings?.[0]?.id ||
-        bookingRes.data?.id;
+      const bookingIds =
+  bookingRes.data?.bookings?.map(
+    (b) => b.id
+  ) || [];
 
-      if (!bookingId) {
-        alert("Không tìm thấy booking ID");
-        return;
-      }
+if (!bookingIds.length) {
+  alert("Không tìm thấy booking");
+  return;
+}
 
-      // ================= PAYMENT =================
-      const paymentRes = await API.post(
-        "/bookings/payment/create",
-        {
-          bookingIds: [bookingId],
-          amount: Number(totalPrice),
-          platform: "web",
-        },
-        config
-      );
+const paymentRes = await API.post(
+  "/bookings/payment/create",
+  {
+    bookingIds,
+
+    amount:
+      paymentMethod === "deposit"
+        ? Math.round(
+            Number(totalPrice) * 0.3
+          )
+        : Number(totalPrice),
+
+    platform: "web",
+  },
+  config
+);
 
       if (paymentRes.data?.checkoutUrl) {
         window.location.href = paymentRes.data.checkoutUrl;
@@ -446,67 +448,55 @@ function Checkout() {
 
             <div className="payment-grid">
 
-              {/* CASH */}
-              <div
-                className={`payment-box ${paymentMethod ===
-                    "cash"
-                    ? "active-payment"
-                    : ""
-                  }`}
-                onClick={() =>
-                  setPaymentMethod(
-                    "cash"
-                  )
-                }
-              >
+  {/* DEPOSIT */}
+  <div
+    className={`payment-box ${
+      paymentMethod === "deposit"
+        ? "active-payment"
+        : ""
+    }`}
+    onClick={() =>
+      setPaymentMethod("deposit")
+    }
+  >
+    <div className="payment-icon banking">
+      <FaMoneyBillWave />
+    </div>
 
-                <div className="payment-icon cash">
-                  <FaMoneyBillWave />
-                </div>
+    <div className="payment-info">
+      <h4>Đặt cọc 30%</h4>
 
-                <div className="payment-info">
-                  <h4>
-                    Tiền mặt
-                  </h4>
+      <p>
+        Thanh toán trước 30% giá trị đơn sân
+      </p>
+    </div>
+  </div>
 
-                  <p>
-                    Thanh toán khi đến sân
-                  </p>
-                </div>
+  {/* FULL PAYMENT */}
+  <div
+    className={`payment-box ${
+      paymentMethod === "banking"
+        ? "active-payment"
+        : ""
+    }`}
+    onClick={() =>
+      setPaymentMethod("banking")
+    }
+  >
+    <div className="payment-icon banking">
+      <FaMoneyBillWave />
+    </div>
 
-              </div>
+    <div className="payment-info">
+      <h4>Thanh toán toàn bộ</h4>
 
-              {/* BANKING */}
-              <div
-                className={`payment-box ${paymentMethod ===
-                    "banking"
-                    ? "active-payment"
-                    : ""
-                  }`}
-                onClick={() =>
-                  setPaymentMethod(
-                    "banking"
-                  )
-                }
-              >
+      <p>
+        Thanh toán 100% giá trị đơn sân
+      </p>
+    </div>
+  </div>
 
-                <div className="payment-icon banking">
-                  <FaMoneyBillWave />
-                </div>
-
-                <div className="payment-info">
-                  <h4>
-                    Thanh toán online
-                  </h4>
-
-                  <p>
-                    Chuyển khoản / QR Pay
-                  </p>
-                </div>
-
-              </div>
-
-            </div>
+</div>
 
           </div>
 
@@ -644,7 +634,40 @@ function Checkout() {
               </h1>
 
             </div>
+              <div className="summary-row">
+  <span className="label">
+    Thanh toán ngay
+  </span>
 
+  <span
+    className="value"
+    style={{
+      color: "#22c55e",
+      fontWeight: "700",
+    }}
+  >
+    {(
+      paymentMethod === "deposit"
+        ? totalPrice * 0.3
+        : totalPrice
+    ).toLocaleString()}
+    đ
+  </span>
+</div>
+{paymentMethod === "deposit" && (
+  <div className="summary-row">
+    <span className="label">
+      Thanh toán tại sân
+    </span>
+
+    <span className="value">
+      {Math.round(
+        totalPrice * 0.7
+      ).toLocaleString()}
+      đ
+    </span>
+  </div>
+)}
             {/* BUTTON */}
             <button
               className="confirm-btn"
@@ -655,11 +678,11 @@ function Checkout() {
             >
 
               {loading
-                ? "Đang xử lý..."
-                : paymentMethod ===
-                  "banking"
-                  ? "Thanh toán online"
-                  : "Xác nhận đặt sân"}
+  ? "Đang xử lý..."
+  : paymentMethod ===
+    "deposit"
+  ? "Thanh toán cọc 30%"
+  : "Thanh toán toàn bộ"}
 
             </button>
 
