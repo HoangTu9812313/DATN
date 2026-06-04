@@ -24,7 +24,7 @@ function Checkout() {
   const navigate = useNavigate();
 
   const [paymentMethod, setPaymentMethod] =
-  useState("deposit");
+    useState("deposit");
 
   const [loading, setLoading] =
     useState(false);
@@ -119,11 +119,19 @@ function Checkout() {
   // ================= SORT SLOT =================
   const sortedSlots = [
     ...(selectedTimes || []),
-  ].sort((a, b) =>
-    a.start_time.localeCompare(
+  ].sort((a, b) => {
+    const dateCompare =
+      a.booking_date.localeCompare(
+        b.booking_date
+      );
+
+    if (dateCompare !== 0)
+      return dateCompare;
+
+    return a.start_time.localeCompare(
       b.start_time
-    )
-  );
+    );
+  });
 
   // ================= TOTAL =================
   const subtotal =
@@ -172,7 +180,7 @@ function Checkout() {
 
         bookings: sortedSlots.map(
           (slot) => ({
-            date: formattedDate,
+            date: slot.booking_date,
             slot: slot.start_time,
           })
         ),
@@ -205,34 +213,34 @@ function Checkout() {
         config
       );
       // ================= CASH =================
-      
+
 
       const bookingIds =
-  bookingRes.data?.bookings?.map(
-    (b) => b.id
-  ) || [];
+        bookingRes.data?.bookings?.map(
+          (b) => b.id
+        ) || [];
 
-if (!bookingIds.length) {
-  alert("Không tìm thấy booking");
-  return;
-}
+      if (!bookingIds.length) {
+        alert("Không tìm thấy booking");
+        return;
+      }
 
-const paymentRes = await API.post(
-  "/bookings/payment/create",
-  {
-    bookingIds,
+      const paymentRes = await API.post(
+        "/bookings/payment/create",
+        {
+          bookingIds,
 
-    amount:
-      paymentMethod === "deposit"
-        ? Math.round(
-            Number(totalPrice) * 0.3
-          )
-        : Number(totalPrice),
+          amount:
+            paymentMethod === "deposit"
+              ? Math.round(
+                Number(totalPrice) * 0.3
+              )
+              : Number(totalPrice),
 
-    platform: "web",
-  },
-  config
-);
+          platform: "web",
+        },
+        config
+      );
 
       if (paymentRes.data?.checkoutUrl) {
         window.location.href = paymentRes.data.checkoutUrl;
@@ -345,18 +353,23 @@ const paymentRes = await API.post(
                   >
 
                     <div>
-                      <FaClock />
-                      {" "}
+                      <div>
+                        📅 {slot.booking_date}
+                      </div>
 
-                      {formatTime(
-                        slot.start_time
-                      )}
+                      <div>
+                        <FaClock />
 
-                      {" - "}
+                        {formatTime(
+                          slot.start_time
+                        )}
 
-                      {formatTime(
-                        slot.end_time
-                      )}
+                        {" - "}
+
+                        {formatTime(
+                          slot.end_time
+                        )}
+                      </div>
                     </div>
 
                     <strong>
@@ -448,55 +461,53 @@ const paymentRes = await API.post(
 
             <div className="payment-grid">
 
-  {/* DEPOSIT */}
-  <div
-    className={`payment-box ${
-      paymentMethod === "deposit"
-        ? "active-payment"
-        : ""
-    }`}
-    onClick={() =>
-      setPaymentMethod("deposit")
-    }
-  >
-    <div className="payment-icon banking">
-      <FaMoneyBillWave />
-    </div>
+              {/* DEPOSIT */}
+              <div
+                className={`payment-box ${paymentMethod === "deposit"
+                    ? "active-payment"
+                    : ""
+                  }`}
+                onClick={() =>
+                  setPaymentMethod("deposit")
+                }
+              >
+                <div className="payment-icon banking">
+                  <FaMoneyBillWave />
+                </div>
 
-    <div className="payment-info">
-      <h4>Đặt cọc 30%</h4>
+                <div className="payment-info">
+                  <h4>Đặt cọc 30%</h4>
 
-      <p>
-        Thanh toán trước 30% giá trị đơn sân
-      </p>
-    </div>
-  </div>
+                  <p>
+                    Thanh toán trước 30% giá trị đơn sân
+                  </p>
+                </div>
+              </div>
 
-  {/* FULL PAYMENT */}
-  <div
-    className={`payment-box ${
-      paymentMethod === "banking"
-        ? "active-payment"
-        : ""
-    }`}
-    onClick={() =>
-      setPaymentMethod("banking")
-    }
-  >
-    <div className="payment-icon banking">
-      <FaMoneyBillWave />
-    </div>
+              {/* FULL PAYMENT */}
+              <div
+                className={`payment-box ${paymentMethod === "banking"
+                    ? "active-payment"
+                    : ""
+                  }`}
+                onClick={() =>
+                  setPaymentMethod("banking")
+                }
+              >
+                <div className="payment-icon banking">
+                  <FaMoneyBillWave />
+                </div>
 
-    <div className="payment-info">
-      <h4>Thanh toán toàn bộ</h4>
+                <div className="payment-info">
+                  <h4>Thanh toán toàn bộ</h4>
 
-      <p>
-        Thanh toán 100% giá trị đơn sân
-      </p>
-    </div>
-  </div>
+                  <p>
+                    Thanh toán 100% giá trị đơn sân
+                  </p>
+                </div>
+              </div>
 
-</div>
+            </div>
 
           </div>
 
@@ -634,40 +645,40 @@ const paymentRes = await API.post(
               </h1>
 
             </div>
+            <div className="summary-row">
+              <span className="label">
+                Thanh toán ngay
+              </span>
+
+              <span
+                className="value"
+                style={{
+                  color: "#22c55e",
+                  fontWeight: "700",
+                }}
+              >
+                {(
+                  paymentMethod === "deposit"
+                    ? totalPrice * 0.3
+                    : totalPrice
+                ).toLocaleString()}
+                đ
+              </span>
+            </div>
+            {paymentMethod === "deposit" && (
               <div className="summary-row">
-  <span className="label">
-    Thanh toán ngay
-  </span>
+                <span className="label">
+                  Thanh toán tại sân
+                </span>
 
-  <span
-    className="value"
-    style={{
-      color: "#22c55e",
-      fontWeight: "700",
-    }}
-  >
-    {(
-      paymentMethod === "deposit"
-        ? totalPrice * 0.3
-        : totalPrice
-    ).toLocaleString()}
-    đ
-  </span>
-</div>
-{paymentMethod === "deposit" && (
-  <div className="summary-row">
-    <span className="label">
-      Thanh toán tại sân
-    </span>
-
-    <span className="value">
-      {Math.round(
-        totalPrice * 0.7
-      ).toLocaleString()}
-      đ
-    </span>
-  </div>
-)}
+                <span className="value">
+                  {Math.round(
+                    totalPrice * 0.7
+                  ).toLocaleString()}
+                  đ
+                </span>
+              </div>
+            )}
             {/* BUTTON */}
             <button
               className="confirm-btn"
@@ -678,11 +689,11 @@ const paymentRes = await API.post(
             >
 
               {loading
-  ? "Đang xử lý..."
-  : paymentMethod ===
-    "deposit"
-  ? "Thanh toán cọc 30%"
-  : "Thanh toán toàn bộ"}
+                ? "Đang xử lý..."
+                : paymentMethod ===
+                  "deposit"
+                  ? "Thanh toán cọc 30%"
+                  : "Thanh toán toàn bộ"}
 
             </button>
 

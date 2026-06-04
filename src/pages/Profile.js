@@ -22,11 +22,12 @@ function Profile() {
 
   const [activeTab, setActiveTab] =
     useState("profile");
-
-  // =========================
+  const [refundReason, setRefundReason] = useState("");
+  // ==================== =====
   // BOOKINGS
   // =========================
-
+  const [showSlotSelect, setShowSlotSelect] = useState(false);
+  const [slotsToCancel, setSlotsToCancel] = useState([]);
   const [bookings, setBookings] =
     useState([]);
   const [groupedBookings, setGroupedBookings] = useState([]);
@@ -100,7 +101,40 @@ function Profile() {
   // =========================
   // GET MY BOOKINGS
   // =========================
+  // =========================
+  // COPY LOGIC FROM ADMIN
+  // =========================
 
+  const calculateTotal = (booking) => {
+    return booking.slots.reduce((sum, slot) => {
+
+      if (
+        slot.status === "cancelled" ||
+        slot.payment_status === "refunded"
+      ) {
+        return sum;
+      }
+
+      return sum + Number(slot.price || 0);
+
+    }, 0);
+  };
+
+  const calculatePaidAmount = (booking) => {
+    const total = calculateTotal(booking);
+
+    if (booking.payment_method === "deposit") {
+      return Math.round(
+        total * (parseFloat(booking.deposit_percent) || 30) / 100
+      );
+    }
+
+    return total;
+  };
+
+  const calculateRemainingAmount = (booking) => {
+    return calculateTotal(booking) - calculatePaidAmount(booking);
+  };
   const fetchBookings = async () => {
     try {
       setLoadingBookings(true);
@@ -132,6 +166,8 @@ function Profile() {
       // group slots
       const grouped = groupBookings(raw);
 
+      console.log(groupedBookings);
+
       setBookings(raw);
       setGroupedBookings(grouped);
     } catch (error) {
@@ -145,105 +181,95 @@ function Profile() {
     const map = {};
 
     list.forEach((item) => {
-
-      // group theo payment_group
-      const key =
-        item.payment_group ||
-        item.id;
+      const key = item.payment_group || item.id;
 
       if (!map[key]) {
-  map[key] = {
-    ...item,
-    slots: [],
-    total_price: 0,
-    final_amount: 0,
-    deposit_amount: 0,
-    remaining_amount: 0,
-  };
-}
-
-      map[key].slots.push({
-        id: item.id,
-        start_time: item.start_time,
-        end_time: item.end_time,
-        price:
-  item.price ||
-  item.slot_price ||
-  item.total_price ||
-  0,
-        status: item.status,
-        payment_status: item.payment_status,
-      });
-
-      if (
-        item.payment_status === "refund_pending"
-      ) {
-        map[key].payment_status = "refund_pending";
+        map[key] = {
+          ...item,
+          slots: [],
+        };
       }
 
+      // chỉ lấy slot chưa huỷ để hiển thị
       if (
-        item.payment_status === "refunded"
+        item.status !== "cancelled" &&
+        item.payment_status !== "refunded"
       ) {
-        map[key].payment_status = "refunded";
+        map[key].slots.push({
+          id: item.id,
+          start_time: item.start_time,
+          end_time: item.end_time,
+          price:
+            Number(
+              item.price ??
+              item.slot_price ??
+              item.total_price ??
+              item.amount ??
+              0
+            ),
+          status: item.status,
+          payment_status: item.payment_status,
+        });
       }
-      map[key].total_price += Number(
-  item.total_price || item.price || 0
-);
-
-map[key].final_amount += Number(
-  item.final_amount || 0
-);
-
-map[key].deposit_amount += Number(
-  item.deposit_amount || 0
-);
-
-map[key].remaining_amount += Number(
-  item.remaining_amount || 0
-);
     });
+
     Object.values(map).forEach((booking) => {
-      const allCancelled = booking.slots.every(
-        (slot) => slot.status === "cancelled"
+      const groupItems = list.filter(
+        (i) => (i.payment_group || i.id) === (booking.payment_group || booking.id)
       );
 
-      if (allCancelled) {
+      const cancelledCount = groupItems.filter(
+        (i) => i.status === "cancelled"
+      ).length;
+
+      if (cancelledCount === groupItems.length) {
         booking.status = "cancelled";
+      } else if (cancelledCount > 0) {
+        booking.status = "partial_cancelled";
+      } else {
+        booking.status = "confirmed";
       }
     });
+
     return Object.values(map).sort(
-      (a, b) =>
-        new Date(b.createdAt) -
-        new Date(a.createdAt)
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
   };
 
-
   const getPaymentStatusText = (booking) => {
-  switch (booking.payment_status) {
 
-    case "pending":
-      return "Chờ thanh toán";
+    if (booking.status === "partial_cancelled") {
+      return "Đã huỷ một phần";
+    }
 
-    case "deposit_paid":
-      return "Đã cọc 30%";
+    if (booking.status === "cancelled") {
+      return "Đã huỷ toàn bộ";
+    }
 
-    case "paid":
-      return "Đã thanh toán";
+    switch (booking.payment_status) {
 
-    case "refund_pending":
-      return "Chờ hoàn tiền";
+      case "pending":
+        return "Chờ thanh toán";
 
-    case "refunded":
-      return "Đã hoàn tiền";
+      case "deposit_paid":
+        return "Đã cọc 30%";
 
-    case "refund_rejected":
-      return "Từ chối hoàn tiền";
+      case "paid":
+        return "Đã thanh toán";
 
-    default:
-      return booking.status;
-  }
-};
+      case "refund_pending":
+        return "Chờ hoàn tiền";
+
+      case "refunded":
+        return "Đã hoàn tiền";
+
+      case "refund_rejected":
+        return "Từ chối hoàn tiền";
+
+      default:
+        return booking.status;
+    }
+  };
   // =========================
   // HANDLE INPUT
   // =========================
@@ -317,49 +343,19 @@ map[key].remaining_amount += Number(
       if (!confirmCancel) return;
 
       const booking = bookings.find(
-        (b) => String(b.id || b._id) === String(bookingId)
+        (b) => Number(b.id) === Number(bookingId)
       );
+
+      console.log("BOOKING FOUND =", booking);
 
       if (!booking) {
         alert("Không tìm thấy booking");
         return;
       }
 
-      const isCash = booking.payment_method === "cash";
+      console.log("bookingId =", bookingId);
+      console.log("booking =", booking);
 
-      // CASH → cancel luôn
-      if (isCash) {
-        const res = await API.put(
-          `/bookings/${bookingId}/cancel`,
-          {
-            cancel_type: "cash",
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        alert(res.data?.message || "Hủy thành công");
-        fetchBookings();
-        setSelectedBooking(null);
-        return;
-      }
-      const total =
-        selectedBooking.slots?.reduce(
-          (sum, slot) => sum + Number(slot.price || 0),
-          0
-        ) || 0;
-
-      const isDeposit = selectedBooking.payment_method === "deposit";
-
-      const paid = isDeposit
-        ? selectedBooking.deposit_amount || total * 0.3
-        : selectedBooking.final_amount || total;
-
-      const remaining = isDeposit ? total - paid : 0;
-      // BANK → mở form nhập bank
       setSelectedBooking(booking);
       setShowBankForm(true);
       setCancelMode("bank");
@@ -368,27 +364,50 @@ map[key].remaining_amount += Number(
       alert(error?.response?.data?.message || "Hủy sân thất bại");
     }
   };
+
+  const handleCancelSlot = (slot, booking) => {
+    const activeSlots = booking.slots.filter(
+      s =>
+        s.status !== "cancelled" &&
+        s.payment_status !== "refunded"
+    );
+
+    if (activeSlots.length <= 1) {
+      // chỉ còn 1 slot → huỷ luôn
+      setSelectedBooking(booking);
+      setSlotsToCancel([slot]);
+      setCancelMode("bank");
+      setShowBankForm(true);
+      return;
+    }
+
+    // nhiều slot → mở chọn slot
+    setSelectedBooking(booking);
+    setSlotsToCancel(activeSlots);
+    setShowSlotSelect(true);
+  };
   const handleConfirmCancelTransfer = async () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem("userInfo"));
       const token = userInfo?.token || userInfo?.accessToken;
 
-      const bookingId = selectedBooking?.id || selectedBooking?._id;
+      const bookingId =
+        slotsToCancel?.[0]?.id;
 
       const res = await API.put(
-  `/bookings/${bookingId}/cancel`,
-  {
-    bank_name: bankInfo.bank_name,
-    bank_number: bankInfo.bank_number,
-    bank_owner: bankInfo.bank_owner,
-    reason: "",
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
+        `/bookings/${bookingId}/cancel`,
+        {
+          bank_name: bankInfo.bank_name,
+          bank_number: bankInfo.bank_number,
+          bank_owner: bankInfo.bank_owner,
+          reason: refundReason,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       alert(res.data?.message || "Hủy & hoàn tiền thành công");
 
@@ -665,8 +684,8 @@ map[key].remaining_amount += Number(
                         Khung giờ
                       </th>
 
+                      <th>Tổng tiền</th>
                       <th>Đã thanh toán</th>
-
                       <th>
                         Trạng thái
                       </th>
@@ -683,10 +702,9 @@ map[key].remaining_amount += Number(
                         ? new Date(booking.booking_date).toLocaleDateString("vi-VN")
                         : "Không có ngày";
 
-                      const totalPrice = booking.slots.reduce(
-                        (sum, s) => sum + Number(s.price || 0),
-                        0
-                      );
+                      const totalPrice = booking.slots
+                        .filter(s => s.status !== "cancelled")
+                        .reduce((sum, s) => sum + Number(s.price || 0), 0);
 
                       return (
                         <tr
@@ -709,17 +727,18 @@ map[key].remaining_amount += Number(
                                     {slot.start_time} - {slot.end_time}
                                   </span>
 
-                                  {slot.status === "cancelled" ? (
+                                  {slot.payment_status === "refund_pending" ? (
+                                    <span className="slot-pending">
+                                      ⏳ Chờ xác nhận
+                                    </span>
+                                  ) : slot.status === "cancelled" ? (
                                     <span className="slot-cancelled">
                                       Đã huỷ
                                     </span>
                                   ) : (
-                                    <button
-                                      className="cancel-slot-btn"
-                                      onClick={() => handleCancelBooking(slot.id)}
-                                    >
-                                      ❌ Huỷ giờ này
-                                    </button>
+                                    <span className="slot-active">
+                                      Đang đặt
+                                    </span>
                                   )}
                                 </div>
                               ))}
@@ -728,19 +747,36 @@ map[key].remaining_amount += Number(
 
                           {/* PRICE */}
                           <td className="price">
-  {booking.payment_method === "deposit"
-    ? booking.deposit_amount.toLocaleString()
-    : booking.final_amount.toLocaleString()
-  }đ
-</td>
-
+                            {calculateTotal(booking).toLocaleString("vi-VN")}đ
+                          </td>
+                          <td className="price">
+                            {calculatePaidAmount(booking).toLocaleString("vi-VN")}đ
+                          </td>
                           {/* STATUS */}
                           <td>
-                            <span
-                              className={`status-badge ${booking.payment_status || "pending"}`}
-                            >
-                              {getPaymentStatusText(booking)}
-                            </span>
+                            <div className="slot-status-list">
+                              {booking.slots.map((slot) => (
+                                <div key={slot.id}>
+                                  {slot.start_time} - {slot.end_time} :
+
+                                  <span
+                                    className={
+                                      slot.payment_status === "refund_pending"
+                                        ? "status-pending"
+                                        : slot.status === "cancelled"
+                                          ? "status-cancelled"
+                                          : "status-active"
+                                    }
+                                  >
+                                    {slot.payment_status === "refund_pending"
+                                      ? "Chờ xác nhận"
+                                      : slot.status === "cancelled"
+                                        ? "Đã huỷ"
+                                        : "Đang đặt"}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
                           </td>
 
                           {/* ACTION */}
@@ -881,18 +917,6 @@ map[key].remaining_amount += Number(
                       <span>
                         {slot.start_time} - {slot.end_time}
                       </span>
-
-                      {slot.status === "cancelled" ? (
-                        <span className="slot-cancelled">
-                          Đã huỷ
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => handleCancelBooking(slot.id)}
-                        >
-                          Huỷ giờ này
-                        </button>
-                      )}
                     </div>
                   ))}
                 </strong>
@@ -904,10 +928,7 @@ map[key].remaining_amount += Number(
                 <span>Tổng tiền</span>
 
                 <strong className="price-text">
-                  {selectedBooking.slots
-                    ?.reduce((sum, slot) => sum + Number(slot.price || 0), 0)
-                    .toLocaleString()}
-                  đ
+                  {calculateTotal(selectedBooking).toLocaleString("vi-VN")}đ
                 </strong>
               </div>
 
@@ -925,7 +946,7 @@ map[key].remaining_amount += Number(
 
               {/* PAYMENT */}
 
-              
+
 
               {/* TRANSACTION */}
 
@@ -941,34 +962,116 @@ map[key].remaining_amount += Number(
                 </div>
 
               )}
+              {showSlotSelect && (
+
+                <div className="slot-select-box">
+
+                  <h3>
+                    Chọn khung giờ muốn huỷ
+                  </h3>
+
+                  {slotsToCancel.map((slot) => (
+
+                    <div
+                      key={slot.id}
+                      className="slot-select-item"
+                    >
+
+                      <span>
+                        {slot.start_time}
+                        -
+                        {slot.end_time}
+                      </span>
+
+                      <strong>
+                        {Number(slot.price || 0)
+                          .toLocaleString("vi-VN")}đ
+                      </strong>
+
+                      <button
+                        className="refund-request-btn"
+                        onClick={() => {
+
+                          setSlotsToCancel([slot]);
+
+                          setShowSlotSelect(false);
+
+                          setShowBankForm(true);
+
+                          setCancelMode("bank");
+                        }}
+                      >
+                        💸 Yêu cầu hoàn tiền
+                      </button>
+
+                    </div>
+
+                  ))}
+
+                </div>
+
+              )}
             </div>
             {showBankForm && cancelMode === "bank" && selectedBooking && (
               <div className="bank-form">
-                <h3>Nhập thông tin hoàn tiền</h3>
+                <h3>Thông tin hoàn tiền</h3>
 
                 <input
+                  type="text"
                   placeholder="Tên ngân hàng"
                   value={bankInfo.bank_name}
                   onChange={(e) =>
-                    setBankInfo({ ...bankInfo, bank_name: e.target.value })
+                    setBankInfo({
+                      ...bankInfo,
+                      bank_name: e.target.value,
+                    })
                   }
                 />
 
                 <input
+                  type="text"
                   placeholder="Số tài khoản"
                   value={bankInfo.bank_number}
                   onChange={(e) =>
-                    setBankInfo({ ...bankInfo, bank_number: e.target.value })
+                    setBankInfo({
+                      ...bankInfo,
+                      bank_number: e.target.value,
+                    })
                   }
                 />
 
                 <input
+                  type="text"
                   placeholder="Tên chủ tài khoản"
                   value={bankInfo.bank_owner}
                   onChange={(e) =>
-                    setBankInfo({ ...bankInfo, bank_owner: e.target.value })
+                    setBankInfo({
+                      ...bankInfo,
+                      bank_owner: e.target.value,
+                    })
                   }
                 />
+
+                <textarea
+                  placeholder="Nhập lý do hoàn tiền..."
+                  value={refundReason}
+                  onChange={(e) =>
+                    setRefundReason(e.target.value)
+                  }
+                  rows={4}
+                />
+
+                <div className="refund-info-preview">
+                  <p>
+                    <strong>Số tiền hoàn:</strong>{" "}
+                    {calculatePaidAmount(selectedBooking).toLocaleString("vi-VN")}đ
+                  </p>
+
+                  <p>
+                    <strong>Ngày yêu cầu:</strong>{" "}
+                    {new Date().toLocaleString("vi-VN")}
+                  </p>
+                </div>
 
                 <button
                   className="update-btn"
@@ -979,78 +1082,84 @@ map[key].remaining_amount += Number(
               </div>
             )}
             <button
-  className="invoice-btn"
-  onClick={() => setShowInvoice(!showInvoice)}
->
-  {showInvoice ? "Ẩn hoá đơn" : "Xem hoá đơn"}
-</button>
+              className="invoice-btn"
+              onClick={() => setShowInvoice(!showInvoice)}
+            >
+              {showInvoice ? "Ẩn hoá đơn" : "Xem hoá đơn"}
+            </button>
 
-{showInvoice && (
-  <div className="invoice-box">
-    <h3>📄 Hoá đơn thanh toán</h3>
+            {showInvoice && (
+              <div className="invoice-box">
+                <h3>📄 Hoá đơn thanh toán</h3>
 
-    <div className="invoice-row">
-      <span>Sân:</span>
-      <b>{selectedBooking.field?.name}</b>
-    </div>
+                <div className="invoice-row">
+                  <span>Sân:</span>
+                  <b>{selectedBooking.field?.name}</b>
+                </div>
 
-    <div className="invoice-row">
-      <span>Ngày:</span>
-      <b>
-        {new Date(selectedBooking.booking_date).toLocaleDateString("vi-VN")}
-      </b>
-    </div>
+                <div className="invoice-row">
+                  <span>Ngày:</span>
+                  <b>
+                    {new Date(selectedBooking.booking_date).toLocaleDateString("vi-VN")}
+                  </b>
+                </div>
 
-    <div className="invoice-row">
-      <span>Loại thanh toán:</span>
-      <b>
-        {selectedBooking.payment_method === "deposit"
-          ? "Cọc 30%"
-          : "Thanh toán full"}
-      </b>
-    </div>
+                <div className="invoice-row">
+                  <span>Loại thanh toán:</span>
+                  <b>
+                    {selectedBooking.payment_method === "deposit"
+                      ? "Cọc 30%"
+                      : "Thanh toán full"}
+                  </b>
+                </div>
 
-    <div className="invoice-row">
-      <span>Tổng tiền:</span>
-      <b>
-        {selectedBooking.slots
-          ?.reduce((sum, slot) => sum + Number(slot.price || 0), 0)
-          .toLocaleString()}đ
-      </b>
-    </div>
+                <div className="invoice-row">
+                  <span>Tổng tiền:</span>
+                  <b>{calculateTotal(selectedBooking).toLocaleString("vi-VN")}đ</b>
+                </div>
 
-   <div className="invoice-row">
-  <span>Đã thanh toán:</span>
-  <b>
-    {selectedBooking.deposit_amount.toLocaleString()}đ
-  </b>
-</div>
+                <div className="invoice-row">
+                  <span>Đã thanh toán:</span>
+                  <b>{calculatePaidAmount(selectedBooking).toLocaleString("vi-VN")}đ</b>
+                </div>
 
-<div className="invoice-row">
-  <span>Còn lại:</span>
-  <b>
-    {selectedBooking.remaining_amount.toLocaleString()}đ
-  </b>
-</div>
+                <div className="invoice-row">
+                  <span>Còn lại:</span>
+                  <b>{calculateRemainingAmount(selectedBooking).toLocaleString("vi-VN")}đ</b>
+                </div>
 
-    <div className="invoice-row total">
-      <span>Trạng thái:</span>
-      <b>
-        {getPaymentStatusText(selectedBooking)}
-      </b>
-    </div>
-  </div>
-)}
+                <div className="invoice-row total">
+                  <span>Trạng thái:</span>
+                  <b>
+                    {getPaymentStatusText(selectedBooking)}
+                  </b>
+                </div>
+              </div>
+            )}
             {/* CLOSE */}
             {selectedBooking &&
               selectedBooking.status !== "cancelled" &&
-              selectedBooking.payment_status !== "refunded" &&
+              selectedBooking.slots?.some(
+                slot =>
+                  slot.payment_status !== "refund_pending" &&
+                  slot.payment_status !== "refunded"
+              ) &&
               !showBankForm && (
                 <button
                   className="cancel-booking-btn"
-                  onClick={() =>
-                    handleCancelBooking(selectedBooking.id || selectedBooking._id)
-                  }
+                  onClick={() => {
+
+                    const activeSlots =
+                      selectedBooking.slots.filter(
+                        s =>
+                          s.payment_status !== "refunded" &&
+                          s.payment_status !== "refund_pending"
+                      );
+
+                    setSlotsToCancel(activeSlots);
+
+                    setShowSlotSelect(true);
+                  }}
                 >
                   ❌ Hủy sân
                 </button>

@@ -807,3 +807,18 @@
   padding-top: 8px;
   font-weight: bold;
 }
+.bank-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.refund-info-preview {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f5f5f5;
+}

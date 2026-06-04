@@ -141,39 +141,39 @@ function FieldDetail() {
     );
   };
 
-const getRuleForTime = (startTime) => {
-  return pricingRules.find(
-    (p) =>
-      startTime >= p.start_time &&
-      startTime < p.end_time
-  );
-};
+  const getRuleForTime = (startTime) => {
+    return pricingRules.find(
+      (p) =>
+        startTime >= p.start_time &&
+        startTime < p.end_time
+    );
+  };
   const isPastTime = (slot) => {
-  const now = new Date();
+    const now = new Date();
 
-  const selected = new Date(selectedDate);
+    const selected = new Date(selectedDate);
 
-  // Chỉ kiểm tra khi là ngày hôm nay
-  const isToday =
-    selected.getFullYear() === now.getFullYear() &&
-    selected.getMonth() === now.getMonth() &&
-    selected.getDate() === now.getDate();
+    // Chỉ kiểm tra khi là ngày hôm nay
+    const isToday =
+      selected.getFullYear() === now.getFullYear() &&
+      selected.getMonth() === now.getMonth() &&
+      selected.getDate() === now.getDate();
 
-  if (!isToday) return false;
+    if (!isToday) return false;
 
-  const [hour, minute] = slot.start_time
-    .split(":")
-    .map(Number);
+    const [hour, minute] = slot.start_time
+      .split(":")
+      .map(Number);
 
-  const slotDate = new Date(selected);
+    const slotDate = new Date(selected);
 
-  slotDate.setHours(hour);
-  slotDate.setMinutes(minute);
-  slotDate.setSeconds(0);
-  slotDate.setMilliseconds(0);
+    slotDate.setHours(hour);
+    slotDate.setMinutes(minute);
+    slotDate.setSeconds(0);
+    slotDate.setMilliseconds(0);
 
-  return slotDate < now;
-};
+    return slotDate < now;
+  };
   // ================= GENERATE SLOT =================
 
   const generateSlots = (
@@ -237,15 +237,15 @@ const getRuleForTime = (startTime) => {
 
       const rule = getRuleForTime(startTime);
 
-result.push({
-  start_time: startTime,
-  end_time: endTime,
-  price: getPriceForTime(
-    startTime,
-    slotDuration
-  ),
-  label: rule?.label || "default",
-});
+      result.push({
+        start_time: startTime,
+        end_time: endTime,
+        price: getPriceForTime(
+          startTime,
+          slotDuration
+        ),
+        label: rule?.label || "default",
+      });
     }
 
     return result;
@@ -460,23 +460,27 @@ result.push({
         );
 
         if (user) {
-          const myHolding =
-            bookings.filter(
-              (b) =>
-                b.status ===
-                "holding" &&
-                Number(
-                  b.user_id ||
-                  b.userId
-                ) ===
-                Number(
-                  user.id
-                )
-            );
+          const myHolding = bookings.filter(
+            (b) =>
+              b.status === "holding" &&
+              Number(
+                b.user_id || b.userId
+              ) === Number(user.id)
+          );
 
-          setSelectedTimes(
-            myHolding.map(
-              (b) => ({
+          setSelectedTimes((prev) => {
+            const keepOldDates =
+              prev.filter(
+                (s) =>
+                  s.booking_date !==
+                  formattedDate
+              );
+
+            const currentDateSlots =
+              myHolding.map((b) => ({
+                booking_date:
+                  b.booking_date,
+
                 start_time:
                   normalizeTime(
                     b.start_time
@@ -490,9 +494,13 @@ result.push({
                 price:
                   field?.price_per_hour ||
                   0,
-              })
-            )
-          );
+              }));
+
+            return [
+              ...keepOldDates,
+              ...currentDateSlots,
+            ];
+          });
         }
       } catch (err) {
         console.log(err);
@@ -703,10 +711,10 @@ result.push({
   const handleSelectTime =
     async (slot) => {
       if (isPastTime(slot)) {
-  return alert(
-    "Khung giờ này đã qua, không thể đặt"
-  );
-}
+        return alert(
+          "Khung giờ này đã qua, không thể đặt"
+        );
+      }
       const user =
         JSON.parse(
           localStorage.getItem(
@@ -732,9 +740,8 @@ result.push({
       const alreadySelected =
         selectedTimes.some(
           (s) =>
-            normalizeTime(
-              s.start_time
-            ) === slotTime
+            s.booking_date === formattedDate &&
+            normalizeTime(s.start_time) === slotTime
         );
 
       if (
@@ -765,13 +772,11 @@ result.push({
           setSelectedTimes(
             (prev) =>
               prev.filter(
-                (
-                  s
-                ) =>
-                  normalizeTime(
-                    s.start_time
-                  ) !==
-                  slotTime
+                (s) =>
+                  !(
+                    s.booking_date === formattedDate &&
+                    normalizeTime(s.start_time) === slotTime
+                  )
               )
           );
 
@@ -822,22 +827,15 @@ result.push({
           }
         );
 
-        setSelectedTimes(
-          (prev) => [
-            ...prev,
-
-            {
-              start_time:
-                slotTime,
-
-              end_time:
-                slot.end_time,
-
-              price:
-                slot.price,
-            },
-          ]
-        );
+        setSelectedTimes((prev) => [
+          ...prev,
+          {
+            booking_date: formattedDate,
+            start_time: slotTime,
+            end_time: slot.end_time,
+            price: slot.price,
+          },
+        ]);
       } catch (err) {
         console.log(err);
 
@@ -1233,15 +1231,10 @@ result.push({
                 ) => {
                   const selected =
                     selectedTimes.some(
-                      (
-                        s
-                      ) =>
-                        normalizeTime(
-                          s.start_time
-                        ) ===
-                        normalizeTime(
-                          slot.start_time
-                        )
+                      (s) =>
+                        s.booking_date === formattedDate &&
+                        normalizeTime(s.start_time) ===
+                        normalizeTime(slot.start_time)
                     );
 
                   return (
@@ -1254,36 +1247,36 @@ result.push({
   ${selected ? "selected" : ""}
 `}
                       onClick={() => {
-  if (isPastTime(slot))
-    return;
+                        if (isPastTime(slot))
+                          return;
 
-  if (isBooked(slot))
-    return;
+                        if (isBooked(slot))
+                          return;
 
-  if (
-    isHolding(slot) &&
-    !selected
-  )
-    return;
+                        if (
+                          isHolding(slot) &&
+                          !selected
+                        )
+                          return;
 
-  handleSelectTime(slot);
-}}
+                        handleSelectTime(slot);
+                      }}
                     >
                       <div>
-  <FaClock /> {slot.start_time} - {slot.end_time}
+                        <FaClock /> {slot.start_time} - {slot.end_time}
 
-  {isPastTime(slot) && (
-    <span
-      style={{
-        marginLeft: 8,
-        color: "red",
-        fontWeight: "bold"
-      }}
-    >
-      ⛔ Đã qua
-    </span>
-  )}
-</div>
+                        {isPastTime(slot) && (
+                          <span
+                            style={{
+                              marginLeft: 8,
+                              color: "red",
+                              fontWeight: "bold"
+                            }}
+                          >
+                            ⛔ Đã qua
+                          </span>
+                        )}
+                      </div>
 
                       <div>
                         {Number(
@@ -1292,22 +1285,22 @@ result.push({
                         đ
 
                         {slot.label === "peak" && (
-  <span className="golden-badge peak">
-    🔥 Giờ cao điểm
-  </span>
-)}
+                          <span className="golden-badge peak">
+                            🔥 Giờ cao điểm
+                          </span>
+                        )}
 
-{slot.label === "night" && (
-  <span className="golden-badge night">
-    🌙 Ca đêm
-  </span>
-)}
+                        {slot.label === "night" && (
+                          <span className="golden-badge night">
+                            🌙 Ca đêm
+                          </span>
+                        )}
 
-{slot.label === "normal" && (
-  <span className="golden-badge normal">
-    ⚽ Thường
-  </span>
-)}
+                        {slot.label === "normal" && (
+                          <span className="golden-badge normal">
+                            ⚽ Thường
+                          </span>
+                        )}
                       </div>
                     </div>
                   );
@@ -1332,27 +1325,27 @@ result.push({
                   <div
                     key={i}
                     className={`day ${selectedDate.getDate() ===
-                        day
-                        ? "active-day"
-                        : ""
+                      day
+                      ? "active-day"
+                      : ""
                       }`}
                     onClick={() => {
-  if (!day) return;
+                      if (!day) return;
 
-  const newDate = new Date(selectedDate);
-  newDate.setDate(day);
+                      const newDate = new Date(selectedDate);
+                      newDate.setDate(day);
 
-  const today = new Date();
+                      const today = new Date();
 
-  today.setHours(0, 0, 0, 0);
-  newDate.setHours(0, 0, 0, 0);
+                      today.setHours(0, 0, 0, 0);
+                      newDate.setHours(0, 0, 0, 0);
 
-  if (newDate < today) {
-    return;
-  }
+                      if (newDate < today) {
+                        return;
+                      }
 
-  setSelectedDate(newDate);
-}}
+                      setSelectedDate(newDate);
+                    }}
                   >
                     {day}
                   </div>
@@ -1490,52 +1483,38 @@ result.push({
               </p>
             </div>
             <div>
-              📅{" "}
-              {formattedDate}
+              📅 {formattedDate}
             </div>
 
             <div>
-              ⏱️{" "}
-              {duration} phút
+              ⏱️ {duration} phút
             </div>
 
             <div>
               🕒{" "}
-              {selectedTimes.length >
-                0
-                ? selectedTimes.map(
-                  (
-                    slot,
-                    i
-                  ) => (
-                    <div
-                      key={i}
-                    >
-                      {
-                        slot.start_time
-                      }{" "}
-                      -{" "}
-                      {
-                        slot.end_time
-                      }
+              {selectedTimes.length > 0 ? (
+                selectedTimes.map((slot, i) => (
+                  <div key={i}>
+                    <div>
+                      📅 {slot.booking_date}
                     </div>
-                  )
-                )
-                : "Chưa chọn"}
+
+                    <div>
+                      🕒 {slot.start_time} - {slot.end_time}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                "Chưa chọn"
+              )}
             </div>
 
             <div>
               💰{" "}
               {selectedTimes
                 .reduce(
-                  (
-                    t,
-                    s
-                  ) =>
-                    t +
-                    Number(
-                      s.price
-                    ),
+                  (t, s) =>
+                    t + Number(s.price),
                   0
                 )
                 .toLocaleString()}

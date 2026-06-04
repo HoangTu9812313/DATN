@@ -344,4 +344,29 @@
     font-size: 26px;
   }
 }
+.checkout-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
 
+.cancel-btn {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ef4444;
+  background: white;
+  color: #ef4444;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.cancel-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.confirm-btn {
+  flex: 2;
+}
