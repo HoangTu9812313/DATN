@@ -23,9 +23,9 @@ function Footer() {
           </p>
 
           <div className="footer-social">
-            <a href="#"><FaFacebookF /></a>
-            <a href="#"><FaInstagram /></a>
-            <a href="#"><FaYoutube /></a>
+            <a href="#facebook">Facebook</a>
+<a href="#instagram">Instagram</a>
+<a href="#tiktok">TikTok</a>
           </div>
         </div>
 
