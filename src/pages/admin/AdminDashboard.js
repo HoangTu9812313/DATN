@@ -20,17 +20,36 @@ function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
   const [fields, setFields] = useState([]);
   // ================= DOANH THU =================
+const calculateTotal = (booking) => {
+    const slots = booking.slots || [];
 
+    return slots.reduce((sum, slot) => {
+      return sum + Number(slot.price || 0);
+    }, 0);
+  };
+
+  const calculatePaidAmount = (booking) => {
+    const totalPrice = calculateTotal(booking);
+
+    if (booking.payment_method === "deposit") {
+      return Math.round(
+        totalPrice * Number(booking.deposit_percent || 30) / 100
+      );
+    }
+
+    return totalPrice;
+  };
   const totalRevenue = bookings.reduce(
-    (sum, booking) =>
-      sum +
-      Number(
-        booking.final_amount ||
-        booking.total_amount ||
-        booking.amount ||
-        booking.totalPrice ||
-        0
-      ),
+    (sum, booking) => {
+      if (
+        booking.payment_status === "paid" ||
+        booking.payment_status === "deposit_paid"
+      ) {
+        return sum + calculatePaidAmount(booking);
+      }
+
+      return sum;
+    },
     0
   );
 
@@ -39,26 +58,19 @@ function AdminDashboard() {
     .split("T")[0];
 
   const todayRevenue = bookings
-    .filter(
-      (booking) =>
-        (booking.booking_date ||
-          booking.date ||
-          "")
-          .toString()
-          .slice(0, 10) === today
-    )
-    .reduce(
-      (sum, booking) =>
-        sum +
-        Number(
-          booking.final_amount ||
-          booking.total_amount ||
-          booking.amount ||
-          booking.totalPrice ||
-          0
-        ),
-      0
-    );
+  .filter((booking) => {
+    const date = booking.booking_date || booking.date || "";
+    return date.toString().slice(0, 10) === today;
+  })
+  .reduce((sum, booking) => {
+    if (
+      booking.payment_status === "paid" ||
+      booking.payment_status === "deposit_paid"
+    ) {
+      return sum + calculatePaidAmount(booking);
+    }
+    return sum;
+  }, 0);
 
   const currentMonth =
     new Date().getMonth();
@@ -67,29 +79,22 @@ function AdminDashboard() {
     new Date().getFullYear();
 
   const monthRevenue = bookings
-    .filter((booking) => {
-      const d = new Date(
-        booking.booking_date ||
-        booking.date
-      );
-
-      return (
-        d.getMonth() === currentMonth &&
-        d.getFullYear() === currentYear
-      );
-    })
-    .reduce(
-      (sum, booking) =>
-        sum +
-        Number(
-          booking.final_amount ||
-          booking.total_amount ||
-          booking.amount ||
-          booking.totalPrice ||
-          0
-        ),
-      0
+  .filter((booking) => {
+    const d = new Date(booking.booking_date || booking.date);
+    return (
+      d.getMonth() === currentMonth &&
+      d.getFullYear() === currentYear
     );
+  })
+  .reduce((sum, booking) => {
+    if (
+      booking.payment_status === "paid" ||
+      booking.payment_status === "deposit_paid"
+    ) {
+      return sum + calculatePaidAmount(booking);
+    }
+    return sum;
+  }, 0);
   const userInfo = JSON.parse(
     localStorage.getItem("userInfo")
   );
@@ -156,7 +161,7 @@ function AdminDashboard() {
       setBookings([]);
     }
   };
-
+  
   return (
     <div className="admin-layout">
 

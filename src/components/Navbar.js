@@ -483,21 +483,25 @@ function Navbar() {
                   </div>
 
                   <div
-                    className="dropdown-item"
-                    onClick={() => {
-
-                      navigate(
-                        user?.role === "admin"
-                          ? "/admin"
-                          : "/profile"
-                      );
-
-                      setOpen(false);
-
-                    }}
-                  >
-                    Tài khoản của tôi
-                  </div>
+  className="dropdown-item"
+  onClick={() => {
+    navigate("/profile");
+    setOpen(false);
+  }}
+>
+  Tài khoản của tôi
+</div>
+{user?.role === "admin" && (
+  <div
+    className="dropdown-item"
+    onClick={() => {
+      navigate("/admin");
+      setOpen(false);
+    }}
+  >
+    Quản lý hệ thống
+  </div>
+)}
 
                   <div
                     className="dropdown-item logout"
