@@ -2,9 +2,6 @@ import React from "react";
 import "./Footer.css";
 
 import {
-  FaFacebookF,
-  FaInstagram,
-  FaYoutube,
   FaPhoneAlt,
   FaEnvelope,
   FaMapMarkerAlt,
