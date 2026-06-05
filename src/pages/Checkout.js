@@ -268,7 +268,41 @@ function Checkout() {
       setLoading(false);
     }
   };
+  const handleCancelBooking = async () => {
+    try {
+      const confirmCancel = window.confirm(
+        "Bạn có chắc muốn huỷ đặt sân?"
+      );
 
+      if (!confirmCancel) return;
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      for (const slot of sortedSlots) {
+        await API.post(
+          "/bookings/cancel-hold",
+          {
+            field_id: Number(field.id),
+            booking_date: slot.booking_date,
+            start_time: slot.start_time,
+          },
+          config
+        );
+      }
+
+      alert("Đã huỷ các khung giờ đã chọn");
+
+      navigate(`/fields/${field.id}`);
+    } catch (err) {
+      console.log(err);
+
+      alert("Không thể huỷ giữ sân");
+    }
+  };
   return (
     <div className="checkout-page">
       <div className="checkout-container">
@@ -464,8 +498,8 @@ function Checkout() {
               {/* DEPOSIT */}
               <div
                 className={`payment-box ${paymentMethod === "deposit"
-                    ? "active-payment"
-                    : ""
+                  ? "active-payment"
+                  : ""
                   }`}
                 onClick={() =>
                   setPaymentMethod("deposit")
@@ -487,8 +521,8 @@ function Checkout() {
               {/* FULL PAYMENT */}
               <div
                 className={`payment-box ${paymentMethod === "banking"
-                    ? "active-payment"
-                    : ""
+                  ? "active-payment"
+                  : ""
                   }`}
                 onClick={() =>
                   setPaymentMethod("banking")
@@ -680,6 +714,7 @@ function Checkout() {
               </div>
             )}
             {/* BUTTON */}
+
             <button
               className="confirm-btn"
               onClick={
@@ -697,6 +732,13 @@ function Checkout() {
 
             </button>
 
+            <button
+              className="cancel-btn"
+              onClick={handleCancelBooking}
+              disabled={loading}
+            >
+              Huỷ đặt sân
+            </button>
           </div>
 
         </div>

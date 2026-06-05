@@ -52,7 +52,8 @@ function FieldDetail() {
     bookingsByDate,
     setBookingsByDate,
   ] = useState({});
-
+  const [previewIndex, setPreviewIndex] =
+    useState(null);
   // ================= REVIEW =================
 
   const [reviews, setReviews] =
@@ -1145,7 +1146,66 @@ function FieldDetail() {
 
       return days;
     };
+  const galleryImages = [
+    ...(field?.image ? [field.image] : []),
+    ...(field?.images || []),
+  ];
+  const handlePrevImage = (e) => {
+    e.stopPropagation();
 
+    setPreviewIndex((prev) =>
+      prev === 0
+        ? galleryImages.length - 1
+        : prev - 1
+    );
+  };
+
+  const handleNextImage = (e) => {
+    e.stopPropagation();
+
+    setPreviewIndex((prev) =>
+      prev === galleryImages.length - 1
+        ? 0
+        : prev + 1
+    );
+  };
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (previewIndex === null) return;
+
+      if (e.key === "ArrowLeft") {
+        setPreviewIndex((prev) =>
+          prev === 0
+            ? galleryImages.length - 1
+            : prev - 1
+        );
+      }
+
+      if (e.key === "ArrowRight") {
+        setPreviewIndex((prev) =>
+          prev ===
+            galleryImages.length - 1
+            ? 0
+            : prev + 1
+        );
+      }
+
+      if (e.key === "Escape") {
+        setPreviewIndex(null);
+      }
+    };
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    return () =>
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+  }, [previewIndex, galleryImages.length]);
   if (
     loading ||
     !field
@@ -1162,6 +1222,7 @@ function FieldDetail() {
       <div className="detail-banner">
         <img
           src={
+            field.image ||
             field.images?.[0]
           }
           alt={field.name}
@@ -1182,6 +1243,49 @@ function FieldDetail() {
       <div className="detail-container">
 
         <div className="detail-left">
+          <div className="detail-card">
+            <h2>Hình ảnh sân</h2>
+
+            <div className="field-gallery">
+
+              {field.image && (
+                <div className="main-gallery-image">
+                  <img
+                    src={field.image}
+                    alt="Ảnh chính"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setPreviewIndex(0)}
+                  />
+
+                  <span>
+                    Ảnh chính
+                  </span>
+                </div>
+              )}
+
+              <div className="gallery-grid">
+                {field.images?.map(
+                  (img, index) => (
+                    <img
+                      key={index}
+                      src={img}
+                      alt={`gallery-${index}`}
+                      style={{ cursor: "pointer" }}
+                      onClick={() =>
+                        setPreviewIndex(
+                          field.image
+                            ? index + 1
+                            : index
+                        )
+                      }
+                    />
+                  )
+                )}
+              </div>
+
+            </div>
+
+          </div>
           {/* SLOT */}
 
           <div className="detail-card">
@@ -1594,6 +1698,47 @@ function FieldDetail() {
           </div>
         </div>
       </div>
+
+      {previewIndex !== null && (
+        <div
+          className="image-modal"
+          onClick={() =>
+            setPreviewIndex(null)
+          }
+        >
+          <button
+            className="nav-btn prev-btn"
+            onClick={handlePrevImage}
+          >
+            ❮
+          </button>
+
+          <img
+            src={
+              galleryImages[
+              previewIndex
+              ]
+            }
+            alt="Preview"
+            className="image-preview"
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          />
+
+          <button
+            className="nav-btn next-btn"
+            onClick={handleNextImage}
+          >
+            ❯
+          </button>
+
+          <div className="image-counter">
+            {previewIndex + 1} /
+            {galleryImages.length}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
