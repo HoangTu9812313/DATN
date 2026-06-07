@@ -726,20 +726,6 @@ function Profile() {
                                   <span>
                                     {slot.start_time} - {slot.end_time}
                                   </span>
-
-                                  {slot.payment_status === "refund_pending" ? (
-                                    <span className="slot-pending">
-                                      ⏳ Chờ xác nhận
-                                    </span>
-                                  ) : slot.status === "cancelled" ? (
-                                    <span className="slot-cancelled">
-                                      Đã huỷ
-                                    </span>
-                                  ) : (
-                                    <span className="slot-active">
-                                      Đang đặt
-                                    </span>
-                                  )}
                                 </div>
                               ))}
                             </div>
@@ -760,20 +746,24 @@ function Profile() {
                                   {slot.start_time} - {slot.end_time} :
 
                                   <span
-                                    className={
-                                      slot.payment_status === "refund_pending"
-                                        ? "status-pending"
-                                        : slot.status === "cancelled"
-                                          ? "status-cancelled"
-                                          : "status-active"
-                                    }
-                                  >
-                                    {slot.payment_status === "refund_pending"
-                                      ? "Chờ xác nhận"
-                                      : slot.status === "cancelled"
-                                        ? "Đã huỷ"
-                                        : "Đang đặt"}
-                                  </span>
+  className={
+    slot.payment_status === "refund_pending"
+      ? "status-pending"
+      : slot.payment_status === "refund_rejected"
+      ? "status-rejected"
+      : slot.status === "cancelled"
+      ? "status-cancelled"
+      : "status-active"
+  }
+>
+  {slot.payment_status === "refund_pending"
+    ? "Chờ xác nhận"
+    : slot.payment_status === "refund_rejected"
+    ? "Từ chối hoàn tiền"
+    : slot.status === "cancelled"
+    ? "Đã huỷ"
+    : "Đang đặt"}
+</span>
                                 </div>
                               ))}
                             </div>
