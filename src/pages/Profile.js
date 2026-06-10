@@ -200,13 +200,14 @@ function Profile() {
           start_time: item.start_time,
           end_time: item.end_time,
           price:
-            Number(
-              item.price ??
-              item.slot_price ??
-              item.total_price ??
-              item.amount ??
-              0
-            ),
+  Number(
+    item.final_amount ??
+    item.price ??
+    item.slot_price ??
+    item.total_price ??
+    item.amount ??
+    0
+  ),
           status: item.status,
           payment_status: item.payment_status,
         });
@@ -1107,7 +1108,7 @@ function Profile() {
                   <span>Tổng tiền:</span>
                   <b>{calculateTotal(selectedBooking).toLocaleString("vi-VN")}đ</b>
                 </div>
-
+                      
                 <div className="invoice-row">
                   <span>Đã thanh toán:</span>
                   <b>{calculatePaidAmount(selectedBooking).toLocaleString("vi-VN")}đ</b>

@@ -244,13 +244,13 @@ function Checkout() {
     };
 
 
-    const handleRemoveVoucher = () => {
-  setVoucher(null);
-  setVoucherCode("");
-  setDiscountAmount(0);
+  const handleRemoveVoucher = () => {
+    setVoucher(null);
+    setVoucherCode("");
+    setDiscountAmount(0);
 
-  alert("Đã huỷ mã giảm giá");
-};
+    alert("Đã huỷ mã giảm giá");
+  };
   // ================= HANDLE BOOKING =================
   const handleConfirm = async () => {
     try {
@@ -291,8 +291,9 @@ function Checkout() {
         duration: 60,
 
         voucher_code:
-          paymentMethod === "banking"
-            ? voucher?.code || null
+          paymentMethod === "banking" &&
+            voucher
+            ? voucher.code
             : null,
 
         name,
@@ -304,7 +305,9 @@ function Checkout() {
           "",
 
         payment_method:
-          paymentMethod,
+          paymentMethod === "banking"
+            ? "full"
+            : "deposit",
       };
 
       console.log(
@@ -783,32 +786,32 @@ function Checkout() {
 
             </div>
             {voucher && (
-  <div className="voucher-success">
+              <div className="voucher-success">
 
-    <div className="voucher-info">
-      <div>
-        ✅ Đã áp dụng mã:
-        <strong> {voucher.code}</strong>
-      </div>
+                <div className="voucher-info">
+                  <div>
+                    ✅ Đã áp dụng mã:
+                    <strong> {voucher.code}</strong>
+                  </div>
 
-      <div>
-        Giảm:
-        <strong>
-          {" "}
-          {discountAmount.toLocaleString()}đ
-        </strong>
-      </div>
-    </div>
+                  <div>
+                    Giảm:
+                    <strong>
+                      {" "}
+                      {discountAmount.toLocaleString()}đ
+                    </strong>
+                  </div>
+                </div>
 
-    <button
-      className="remove-voucher-btn"
-      onClick={handleRemoveVoucher}
-    >
-      Huỷ Voucher
-    </button>
+                <button
+                  className="remove-voucher-btn"
+                  onClick={handleRemoveVoucher}
+                >
+                  Huỷ Voucher
+                </button>
 
-  </div>
-)}
+              </div>
+            )}
             <div className="divider"></div>
 
             {/* TOTAL */}
