@@ -37,7 +37,15 @@ function AdminNotifications() {
   const userInfo = JSON.parse(
     localStorage.getItem("userInfo")
   );
+  const getUserName = (id) => {
+  const user = users.find(
+    (u) => Number(u.id) === Number(id)
+  );
 
+  return user
+    ? user.name
+    : `User #${id}`;
+};
   const token = userInfo?.token;
 
   const config = {
@@ -425,7 +433,7 @@ function AdminNotifications() {
                       <span>
                         {item.isGlobal
                           ? "🌍 Tất cả người dùng"
-                          : `👤 User #${item.userId}`}
+                          : `👤 ${getUserName(item.userId)}`}
                       </span>
 
                       <span>
