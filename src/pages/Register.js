@@ -61,7 +61,10 @@ function Register() {
 
     // VALID PHONE
 
-    if (phone.length < 9) {
+    const phoneRegex =
+      /^(0[3|5|7|8|9])[0-9]{8}$/;
+
+    if (!phoneRegex.test(phone)) {
       alert(
         "Số điện thoại không hợp lệ"
       );
@@ -70,9 +73,16 @@ function Register() {
 
     // VALID PASSWORD
 
-    if (password.length < 6) {
+    // VALID PASSWORD
+
+    const passwordRegex =
+      /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+    if (
+      !passwordRegex.test(password)
+    ) {
       alert(
-        "Mật khẩu phải từ 6 ký tự"
+        "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ, số và ký tự đặc biệt"
       );
       return;
     }

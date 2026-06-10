@@ -1,6 +1,6 @@
 // src/pages/Checkout.js
 
-import React, { useState } from "react";
+import React, { useState, useEffect, } from "react";
 import "./style/Checkout.css";
 
 import {
@@ -54,6 +54,17 @@ function Checkout() {
   const [note, setNote] =
     useState("");
 
+  const [voucherCode, setVoucherCode] =
+    useState("");
+
+  const [voucher, setVoucher] =
+    useState(null);
+
+  const [discountAmount, setDiscountAmount] =
+    useState(0);
+
+  const [voucherLoading, setVoucherLoading] =
+    useState(false);
   // ================= NO DATA =================
   if (!bookingData) {
     return (
@@ -83,9 +94,6 @@ function Checkout() {
     field,
     selectedDate,
     selectedTimes,
-    voucher,
-    discountAmount = 0,
-    finalTotal = 0,
   } = bookingData;
 
   // ================= FORMAT DATE =================
@@ -143,11 +151,106 @@ function Checkout() {
     );
 
   const totalPrice =
-    Number(finalTotal || subtotal);
+    Math.max(
+      subtotal - discountAmount,
+      0
+    );
 
   const finalDiscount =
     Number(discountAmount || 0);
 
+
+
+  const handleApplyVoucher =
+    async () => {
+
+      if (
+        paymentMethod === "deposit"
+      ) {
+        return alert(
+          "Thanh toán cọc 30% không được sử dụng mã giảm giá"
+        );
+      }
+
+      if (!voucherCode.trim()) {
+        return alert(
+          "Vui lòng nhập mã giảm giá"
+        );
+      }
+
+      try {
+
+        setVoucherLoading(true);
+
+        const res =
+          await API.post(
+            "/vouchers/validate",
+            {
+              code:
+                voucherCode.trim(),
+
+              amount:
+                Number(subtotal),
+
+              userId:
+                userInfo?.id,
+            }
+          );
+
+        if (!res.data.valid) {
+
+          setVoucher(null);
+
+          setDiscountAmount(0);
+
+          return alert(
+            res.data.message
+          );
+        }
+
+        setVoucher(
+          res.data.voucher
+        );
+
+        setDiscountAmount(
+          Number(
+            res.data.discount || 0
+          )
+        );
+
+        alert(
+          `Áp dụng thành công, giảm ${Number(
+            res.data.discount
+          ).toLocaleString()}đ`
+        );
+
+      } catch (err) {
+
+        setVoucher(null);
+
+        setDiscountAmount(0);
+
+        alert(
+          err.response?.data
+            ?.message ||
+          "Voucher không hợp lệ"
+        );
+
+      } finally {
+
+        setVoucherLoading(false);
+
+      }
+    };
+
+
+    const handleRemoveVoucher = () => {
+  setVoucher(null);
+  setVoucherCode("");
+  setDiscountAmount(0);
+
+  alert("Đã huỷ mã giảm giá");
+};
   // ================= HANDLE BOOKING =================
   const handleConfirm = async () => {
     try {
@@ -188,7 +291,9 @@ function Checkout() {
         duration: 60,
 
         voucher_code:
-          voucher?.code || null,
+          paymentMethod === "banking"
+            ? voucher?.code || null
+            : null,
 
         name,
         phone,
@@ -633,7 +738,77 @@ function Checkout() {
               )}
 
             </div>
+            <div className="voucher-box">
 
+              <h3>Mã giảm giá</h3>
+
+              <input
+                type="text"
+                value={voucherCode}
+                placeholder="Nhập voucher"
+                disabled={
+                  paymentMethod === "deposit"
+                }
+                onChange={(e) =>
+                  setVoucherCode(
+                    e.target.value
+                  )
+                }
+              />
+
+              <button
+                onClick={handleApplyVoucher}
+                disabled={
+                  voucherLoading ||
+                  paymentMethod === "deposit"
+                }
+              >
+                {voucherLoading
+                  ? "Đang kiểm tra..."
+                  : "Áp dụng"}
+              </button>
+
+              {paymentMethod ===
+                "deposit" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "8px",
+                    }}
+                  >
+                    Voucher chỉ áp dụng khi
+                    thanh toán toàn bộ
+                  </p>
+                )}
+
+            </div>
+            {voucher && (
+  <div className="voucher-success">
+
+    <div className="voucher-info">
+      <div>
+        ✅ Đã áp dụng mã:
+        <strong> {voucher.code}</strong>
+      </div>
+
+      <div>
+        Giảm:
+        <strong>
+          {" "}
+          {discountAmount.toLocaleString()}đ
+        </strong>
+      </div>
+    </div>
+
+    <button
+      className="remove-voucher-btn"
+      onClick={handleRemoveVoucher}
+    >
+      Huỷ Voucher
+    </button>
+
+  </div>
+)}
             <div className="divider"></div>
 
             {/* TOTAL */}

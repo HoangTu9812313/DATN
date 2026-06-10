@@ -69,19 +69,6 @@ function FieldDetail() {
     reviewLoading,
     setReviewLoading,
   ] = useState(false);
-  // ================= VOUCHER =================
-
-  const [voucherCode, setVoucherCode] =
-    useState("");
-
-  const [voucher, setVoucher] =
-    useState(null);
-
-  const [discountAmount, setDiscountAmount] =
-    useState(0);
-
-  const [voucherLoading, setVoucherLoading] =
-    useState(false);
   // ================= DATE =================
 
   const formatDate = (
@@ -857,113 +844,9 @@ function FieldDetail() {
     0
   );
 
-  const finalTotal =
-    subtotal - discountAmount > 0
-      ? subtotal - discountAmount
-      : 0;
   // ================= APPLY VOUCHER =================
 
   // ================= APPLY VOUCHER =================
-
-  const handleApplyVoucher =
-    async () => {
-
-      if (!voucherCode.trim()) {
-
-        return alert(
-          "Vui lòng nhập mã voucher"
-        );
-      }
-
-      try {
-
-        setVoucherLoading(true);
-
-        const user =
-          JSON.parse(
-            localStorage.getItem(
-              "userInfo"
-            )
-          );
-
-        const res =
-          await API.post(
-            "/vouchers/validate",
-            {
-              code:
-                voucherCode.trim(),
-
-              amount:
-                Number(subtotal),
-
-              userId:
-                user?.id,
-            }
-          );
-
-        const data =
-          res.data;
-
-        console.log(
-          "VOUCHER RESPONSE:",
-          data
-        );
-
-        // ================= INVALID =================
-
-        if (!data.valid) {
-
-          setVoucher(null);
-
-          setDiscountAmount(0);
-
-          return alert(
-            data.message ||
-            "Voucher không hợp lệ"
-          );
-        }
-
-        // ================= SUCCESS =================
-
-        setVoucher(
-          data.voucher
-        );
-
-        // QUAN TRỌNG
-        setDiscountAmount(
-          Number(
-            data.discount || 0
-          )
-        );
-
-        alert(
-          `Giảm ${Number(
-            data.discount || 0
-          ).toLocaleString()}đ`
-        );
-
-      } catch (err) {
-
-        console.log(
-          "VOUCHER ERROR:",
-          err
-        );
-
-        setVoucher(null);
-
-        setDiscountAmount(0);
-
-        alert(
-          err.response?.data
-            ?.message ||
-          "Voucher không hợp lệ"
-        );
-
-      } finally {
-
-        setVoucherLoading(false);
-      }
-    };
   const handleBooking =
     () => {
       const user =
@@ -991,20 +874,12 @@ function FieldDetail() {
         "/checkout",
         {
           state: {
-            voucher,
-            discountAmount,
-            finalTotal,
-            field,
-
-            selectedDate:
-              formattedDate,
-
-            selectedTimes,
-
-            duration,
-
-            user,
-          },
+      field,
+      selectedDate: formattedDate,
+      selectedTimes,
+      duration,
+      user,
+    },
         }
       );
     };
@@ -1624,68 +1499,26 @@ function FieldDetail() {
                 .toLocaleString()}
               đ
             </div>
-            {/* VOUCHER */}
+         
 
-            <div className="voucher-box">
-
-              <input
-                type="text"
-                placeholder="Nhập mã giảm giá"
-                value={voucherCode}
-                onChange={(e) =>
-                  setVoucherCode(
-                    e.target.value
-                  )
-                }
-              />
-
-              <button
-                className="voucher-btn"
-                onClick={
-                  handleApplyVoucher
-                }
-                disabled={
-                  voucherLoading
-                }
-              >
-                {voucherLoading
-                  ? "Đang kiểm tra..."
-                  : "Áp dụng"}
-              </button>
-
-            </div>
-
+            
             {/* PRICE */}
 
             <div className="price-summary">
 
-              <div>
-                <span>Tạm tính:</span>
+              
 
-                <strong>
-                  {subtotal.toLocaleString()}đ
-                </strong>
-              </div>
+              <div className="price-summary">
 
-              <div>
-                <span>Giảm giá:</span>
+  <div className="final-total">
+    <span>Tổng tiền:</span>
 
-                <strong
-                  style={{
-                    color: "#22c55e",
-                  }}
-                >
-                  - {discountAmount.toLocaleString()}đ
-                </strong>
-              </div>
+    <strong>
+      {subtotal.toLocaleString()}đ
+    </strong>
+  </div>
 
-              <div className="final-total">
-                <span>Tổng tiền:</span>
-
-                <strong>
-                  {finalTotal.toLocaleString()}đ
-                </strong>
-              </div>
+</div>
 
             </div>
             <button
