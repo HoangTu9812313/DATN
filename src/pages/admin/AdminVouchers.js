@@ -424,7 +424,11 @@ function AdminVouchers() {
 
                 <th>Giảm tối đa</th>
 
-                <th>Số lượt</th>
+                <th>Còn lại</th>
+
+                <th>Đã dùng</th>
+                
+                <th>Tổng lượt</th>
 
                 <th>Bắt đầu</th>
 
@@ -470,7 +474,15 @@ function AdminVouchers() {
                     </td>
 
                     <td>
-                      {voucher.usageLimit}
+                      {voucher.remainingUses ?? 0}
+                    </td>
+
+                    <td>
+                      {voucher.usedCount ?? 0}
+                    </td>
+
+                    <td>
+                      {voucher.usageLimit ?? 0}
                     </td>
 
                     <td>

@@ -279,37 +279,43 @@ function Checkout() {
 
       // ================= CREATE BOOKING (NO HOLD HERE) =================
       const payload = {
-        field_id: Number(field.id),
+  field_id: Number(field.id),
 
-        bookings: sortedSlots.map(
-          (slot) => ({
-            date: slot.booking_date,
-            slot: slot.start_time,
-          })
-        ),
+  bookings: sortedSlots.map(
+    (slot) => ({
+      date: slot.booking_date,
+      slot: slot.start_time,
+    })
+  ),
 
-        duration: 60,
+  duration: 60,
 
-        voucher_code:
-          paymentMethod === "banking" &&
-            voucher
-            ? voucher.code
-            : null,
+  voucher_code:
+    paymentMethod === "banking"
+      ? voucher?.code || null
+      : null,
 
-        name,
-        phone,
+  discount_amount:
+    paymentMethod === "banking"
+      ? finalDiscount
+      : 0,
 
-        email:
-          userInfo?.user?.email ||
-          userInfo?.email ||
-          "",
+  final_amount:
+    paymentMethod === "banking"
+      ? totalPrice
+      : subtotal,
 
-        payment_method:
-          paymentMethod === "banking"
-            ? "full"
-            : "deposit",
-      };
+  name,
+  phone,
 
+  email:
+    userInfo?.user?.email ||
+    userInfo?.email ||
+    "",
+
+  payment_method:
+    paymentMethod,
+};
       console.log(
         "BOOKING PAYLOAD",
         payload
