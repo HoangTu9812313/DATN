@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 // ================= SERVER URL =================
 const SERVER_URL =
   process.env.REACT_APP_SOCKET_URL ||
-  "https://football-bk.onrender.com";
+  "https://football-be-1.onrender.com";
 
 // ================= SINGLETON =================
 let socket;
